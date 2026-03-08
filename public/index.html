@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>校园跑腿 - 微信风格聊天</title>
+  <title>校园跑腿 - 微信风格聊天（自定义headerBar/tabBar）</title>
   <style>
-    /* ========== 全局基础样式（匹配UniApp重置样式） ========== */
+    /* ========== 全局基础样式 ========== */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
     body { background-color: #f8f9fa; padding-bottom: 0; }
     /* PC端固定750px宽度布局 */
@@ -18,7 +18,7 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     /* Flex布局工具类 */
-    .flexbox { display: flex; }
+    .flexbox, .flex-c { display: flex; }
     .flex-col { flex-direction: column; }
     .flex1 { flex: 1; }
     .flex-alignc { align-items: center; }
@@ -29,66 +29,164 @@
     .sub-page { display: none; }
     .sub-page.active { display: block; }
     .item { background: white; margin: 10px 0; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .btn { padding: 8px 16px; background: #07c160; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+    .btn { padding: 8px 16px; background: #22d59c; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
     .btn-secondary { background: #666; }
-    .btn-outline { background: white; color: #07c160; border: 1px solid #07c160; }
+    .btn-outline { background: white; color: #22d59c; border: 1px solid #22d59c; }
     .price { color: #ff6b35; font-weight: bold; }
+    .ml-20 { margin-left: 20px; }
+    .ipt { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
 
-    /* ========== UniApp风格自定义导航栏（uv3-navbar） ========== */
-    .uv3-navbar {
-      background: linear-gradient(to right, #07c160, #0000ff);
-      color: #fff;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    /* ========== 自定义headerBar（完全匹配提供的组件） ========== */
+    .header-bar {
       position: relative;
-      z-index: 2024;
-      height: 44px;
-      line-height: 44px;
+      width: 100%;
+      z-index: 2021;
     }
-    .uv3-navbar__back {
+    .header-bar.fixed {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 750px;
+      max-width: 100%;
+    }
+    .header-bar.transparent {
+      background: transparent;
+    }
+    .header-bar__wrap {
       display: flex;
       align-items: center;
-      cursor: pointer;
+      height: 44px;
+      padding: 0 16px;
+      position: relative;
     }
-    .uv3-navbar__title {
-      font-size: 18px;
-      font-weight: bold;
+    .hdbar-action__left {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .hdbar-title {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
+      font-size: 18px;
+      font-weight: bold;
     }
-    .uv3-navbar__right {
+    .hdbar-title.center {
+      text-align: center;
+    }
+    .hdbar-action__search {
+      flex: 1;
+      margin: 0 60px;
+    }
+    .hdbar-action__right {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       align-items: center;
-      gap: 10px;
+    }
+    /* 图标字体模拟 */
+    .iconfont {
+      font-family: "iconfont" !important;
+      font-size: 16px;
+      font-style: normal;
+      -webkit-font-smoothing: antialiased;
+    }
+    .icon-close:before { content: "×"; }
+    .icon-search:before { content: "🔍"; }
+    .icon-choose:before { content: "✓"; }
+    .icon-shoucang:before { content: "❤️"; }
+    .icon-female:before { content: "👩"; }
+    .icon-arrL:before { content: "←"; }
+    .icon-male:before { content: "👨"; }
+    .nuxt__badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: red;
+      color: white;
+      font-size: 12px;
+      padding: 0 5px;
+      border-radius: 10px;
+      min-width: 18px;
+      height: 18px;
+      line-height: 18px;
+      text-align: center;
+    }
+    .nuxt__badge-dot {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      background: red;
+      border-radius: 50%;
     }
 
-    /* ========== UniApp风格底部TabBar（uv3-tabbar） ========== */
-    .uv3-tabbar {
+    /* ========== 自定义tabBar（完全匹配提供的组件） ========== */
+    .tab-bar {
+      width: 100%;
+      z-index: 2025;
+    }
+    .tab-bar.fixed {
       position: fixed;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
       width: 750px;
       max-width: 100%;
-      background: white;
+    }
+    .tab-bar__wrap {
       display: flex;
+      align-items: center;
       justify-content: space-around;
       padding: 8px 0;
       border-top: 1px solid #e5e5e5;
-      z-index: 2025;
     }
-    .uv3-tabbar__item {
+    .navigator {
+      flex: 1;
       text-align: center;
-      font-size: 12px;
-      color: #666;
       cursor: pointer;
+      position: relative;
       padding: 5px 0;
     }
-    .uv3-tabbar__item.active {
-      color: #07c160;
+    .navigator.on .txt {
+      font-weight: bold;
+    }
+    .navigator .ico {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+    .navigator .ico.dock {
+      width: 50px;
+      height: 50px;
+      margin-top: -20px;
+      position: relative;
+    }
+    .dock-bg {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      z-index: -1;
+    }
+    .navigator .txt {
+      font-size: 12px;
+    }
+    .iconimg {
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
     }
 
     /* ========== 微信风格聊天核心样式 ========== */
@@ -98,6 +196,8 @@
       flex-direction: column;
       height: 100vh;
       max-height: 100vh;
+      padding-top: 44px;
+      padding-bottom: 50px;
     }
     /* 聊天内容区 */
     .chat-content {
@@ -137,7 +237,7 @@
       border-top-left-radius: 0;
     }
     .msg-mine .msg-bubble {
-      background: #07c160;
+      background: #22d59c;
       color: white;
       border-top-right-radius: 0;
     }
@@ -193,7 +293,7 @@
       cursor: pointer;
     }
 
-    /* ========== 增强版聊天编辑框（uv3__chattoolbar） ========== */
+    /* ========== 增强版聊天编辑框 ========== */
     .uv3__chattoolbar {
       position: fixed;
       bottom: 50px;
@@ -220,6 +320,7 @@
       justify-content: center;
       padding: 0;
       margin: 0;
+      background: #22d59c;
     }
     .uv3__chattoolbar-editor .editor {
       flex: 1;
@@ -300,8 +401,8 @@
       cursor: pointer;
     }
     .uv3__emotion-tabs .item.on {
-      color: #07c160;
-      border-bottom: 2px solid #07c160;
+      color: #22d59c;
+      border-bottom: 2px solid #22d59c;
     }
     .uv3__emotion-cells {
       display: flex;
@@ -345,7 +446,7 @@
       color: #666;
     }
 
-    /* ========== 其他页面样式（保持不变） ========== */
+    /* ========== 其他页面样式 ========== */
     .page-title { padding: 16px; font-size: 20px; font-weight: bold; text-align: center; background: white; border-bottom: 1px solid #e5e5e5; }
     .sub-title { padding: 12px; font-size: 18px; font-weight: bold; background: white; border-bottom: 1px solid #e5e5e5; }
     .content { padding: 16px; }
@@ -358,56 +459,77 @@
   <div id="app">
     <!-- 1. 首页（登录/注册） -->
     <div id="page-home" class="page active">
-      <div class="page-title">校园跑腿</div>
-      <!-- 首页子页面：登录 -->
-      <div id="home-login" class="sub-page active">
-        <div class="content">
-          <div class="form-item">
-            <label>手机号</label>
-            <input type="tel" placeholder="请输入手机号" id="login-phone">
+      <!-- 自定义headerBar（示例1：渐变背景+透明+自定义内容） -->
+      <div class="header-bar fixed transparent" style="z-index: 2021;">
+        <div class="header-bar__wrap flexbox flex-alignc" style="background: linear-gradient(to right, #f726ff, #2acfff); color: #ff0;">
+          <div class="action hdbar-action__left isback" onclick="switchPage('home')">
+            <i class="iconfont icon-close"></i>
           </div>
-          <div class="form-item">
-            <label>密码</label>
-            <input type="password" placeholder="请输入密码" id="login-pwd">
+          <div class="hdbar-title center">
+            <img src="https://picsum.photos/32/16?random=1" height="16" /> <em>校园跑腿</em>
           </div>
-          <button class="btn" onclick="alert('登录成功！')">密码登录</button>
-          <button class="btn btn-outline" onclick="switchSubPage('home', 'register')">注册账号</button>
-          <button class="btn btn-secondary" onclick="alert('已跳转到个人信息管理页面')">个人信息管理</button>
+          <div class="hdbar-action__right">
+            <div class="ml-20"><i class="iconfont icon-search"></i></div>
+            <div class="ml-20" onclick="alert('选择~~')"><i class="iconfont icon-choose"></i></div>
+            <div class="ml-20"><button class="btn" style="background: #ff0; color: #f726ff; border: none; padding: 4px 8px; font-size: 12px;" onclick="alert('保存成功')">保存</button></div>
+          </div>
         </div>
       </div>
-      <!-- 首页子页面：注册 -->
-      <div id="home-register" class="sub-page">
-        <div class="content">
-          <div class="form-item">
-            <label>用户名</label>
-            <input type="text" placeholder="请输入用户名" id="reg-name">
+      
+      <div style="padding-top: 44px;">
+        <div class="page-title">校园跑腿</div>
+        <!-- 首页子页面：登录 -->
+        <div id="home-login" class="sub-page active">
+          <div class="content">
+            <div class="form-item">
+              <label>手机号</label>
+              <input type="tel" placeholder="请输入手机号" id="login-phone">
+            </div>
+            <div class="form-item">
+              <label>密码</label>
+              <input type="password" placeholder="请输入密码" id="login-pwd">
+            </div>
+            <button class="btn" onclick="alert('登录成功！')">密码登录</button>
+            <button class="btn btn-outline" onclick="switchSubPage('home', 'register')">注册账号</button>
+            <button class="btn btn-secondary" onclick="alert('已跳转到个人信息管理页面')">个人信息管理</button>
           </div>
-          <div class="form-item">
-            <label>手机号</label>
-            <input type="tel" placeholder="请输入手机号" id="reg-phone">
+        </div>
+        <!-- 首页子页面：注册 -->
+        <div id="home-register" class="sub-page">
+          <div class="content">
+            <div class="form-item">
+              <label>用户名</label>
+              <input type="text" placeholder="请输入用户名" id="reg-name">
+            </div>
+            <div class="form-item">
+              <label>手机号</label>
+              <input type="tel" placeholder="请输入手机号" id="reg-phone">
+            </div>
+            <div class="form-item">
+              <label>密码</label>
+              <input type="password" placeholder="请输入密码" id="reg-pwd">
+            </div>
+            <button class="btn" onclick="alert('注册成功！')">完成注册</button>
+            <button class="btn btn-outline" onclick="switchSubPage('home', 'login')">返回登录</button>
           </div>
-          <div class="form-item">
-            <label>密码</label>
-            <input type="password" placeholder="请输入密码" id="reg-pwd">
-          </div>
-          <button class="btn" onclick="alert('注册成功！')">完成注册</button>
-          <button class="btn btn-outline" onclick="switchSubPage('home', 'login')">返回登录</button>
         </div>
       </div>
     </div>
 
-    <!-- 2. 聊天（UniApp+Vue3风格+微信全功能） -->
+    <!-- 2. 聊天（核心功能+自定义headerBar/tabBar） -->
     <div id="page-chat" class="page chat-container">
-      <!-- 自定义导航栏（uv3-navbar） -->
-      <div class="uv3-navbar">
-        <div class="uv3-navbar__back" onclick="switchSubPage('chat', 'list')">
-          <span>←</span>
-          <span style="margin-left:5px">返回</span>
-        </div>
-        <div class="uv3-navbar__title">微信风格聊天</div>
-        <div class="uv3-navbar__right">
-          <span onclick="openRedPacket()">🧧</span>
-          <span onclick="switchSubPage('chat', 'moments')">朋友圈</span>
+      <!-- 自定义headerBar（聊天专用：渐变背景+返回+标题+红包/朋友圈） -->
+      <div class="header-bar fixed" style="z-index: 2021;">
+        <div class="header-bar__wrap flexbox flex-alignc" style="background: linear-gradient(to right, #6126ff, #ff21ee); color: #ff0;">
+          <div class="action hdbar-action__left isback" onclick="switchSubPage('chat', 'list')">
+            <i class="iconfont icon-arrL"></i>
+            <span style="margin-left: 5px;">返回</span>
+          </div>
+          <div class="hdbar-title center" id="chatHeaderTitle">微信风格聊天</div>
+          <div class="hdbar-action__right">
+            <div class="ml-20" onclick="openRedPacket()"><i class="iconfont" style="font-size: 18px;">🧧</i></div>
+            <div class="ml-20" onclick="switchSubPage('chat', 'moments')">朋友圈</div>
+          </div>
         </div>
       </div>
 
@@ -545,7 +667,7 @@
         <div class="media-preview-content" id="mediaPreviewContent"></div>
       </div>
 
-      <!-- 增强版聊天编辑框（uv3__chattoolbar） -->
+      <!-- 增强版聊天编辑框 -->
       <div class="uv3__chattoolbar">
         <div class="uv3__chattoolbar-editor">
           <div class="btn" id="voiceBtn" onclick="toggleVoiceInput()">
@@ -638,259 +760,332 @@
       </div>
     </div>
 
-    <!-- 3. 跑腿服务（保持不变） -->
+    <!-- 3. 跑腿服务 -->
     <div id="page-service" class="page">
-      <div class="page-title">跑腿服务</div>
-      <div id="service-user" class="sub-page active">
-        <div class="content">
-          <button class="btn" onclick="switchSubPage('service', 'publish')">发布订单</button>
-          <button class="btn" onclick="switchSubPage('service', 'order-manage')">订单管理</button>
-          <button class="btn" onclick="switchSubPage('service', 'address')">地址管理</button>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">切换到骑手端</button>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">切换到管理员端</button>
-          <div class="item">
-            <h3>热门服务</h3>
-            <p>📦 快递代取 | 🍱 外卖配送 | 💌 表白墙 | 🛒 二手交易</p>
+      <!-- 自定义headerBar（搜索版） -->
+      <div class="header-bar fixed" style="z-index: 2021;">
+        <div class="header-bar__wrap flexbox flex-alignc" style="background: linear-gradient(to right, #6126ff, #ff21ee); color: #ff0;">
+          <div class="action hdbar-action__left isback" onclick="switchPage('home')">
+            <i class="iconfont icon-close"></i>
+          </div>
+          <div class="hdbar-action__search flex-c flex1">
+            <input class="ipt flex1" placeholder="Search..." value="跑腿服务..." />
+          </div>
+          <div class="hdbar-action__right">
+            <div class="ml-20"> <i class="iconfont icon-shoucang"></i></div>
+            <div class="ml-20"> <i class="iconfont icon-female"></i></div>
           </div>
         </div>
       </div>
-      <div id="service-publish" class="sub-page">
-        <div class="sub-title">发布订单</div>
-        <div class="content">
-          <div class="form-item">
-            <label>服务类型</label>
-            <select>
-              <option>快递代取</option>
-              <option>外卖配送</option>
-              <option>表白墙</option>
-              <option>二手交易</option>
-            </select>
+      
+      <div style="padding-top: 44px;">
+        <div class="page-title">跑腿服务</div>
+        <div id="service-user" class="sub-page active">
+          <div class="content">
+            <button class="btn" onclick="switchSubPage('service', 'publish')">发布订单</button>
+            <button class="btn" onclick="switchSubPage('service', 'order-manage')">订单管理</button>
+            <button class="btn" onclick="switchSubPage('service', 'address')">地址管理</button>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">切换到骑手端</button>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">切换到管理员端</button>
+            <div class="item">
+              <h3>热门服务</h3>
+              <p>📦 快递代取 | 🍱 外卖配送 | 💌 表白墙 | 🛒 二手交易</p>
+            </div>
           </div>
-          <div class="form-item">
-            <label>取货地址</label>
-            <input type="text" placeholder="请输入取货地址">
-          </div>
-          <div class="form-item">
-            <label>送达地址</label>
-            <input type="text" placeholder="请输入送达地址">
-          </div>
-          <div class="form-item">
-            <label>服务费用（元）</label>
-            <input type="number" placeholder="请输入费用" min="0">
-          </div>
-          <button class="btn" onclick="alert('订单发布成功！')">发布订单</button>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
         </div>
-      </div>
-      <div id="service-order-manage" class="sub-page">
-        <div class="sub-title">订单管理</div>
-        <div class="content">
-          <div class="item">
-            <h3>待接单</h3>
-            <p>订单号：123456 | 服务类型：快递代取 | <span class="price">¥10.00</span></p>
-            <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
+        <div id="service-publish" class="sub-page">
+          <div class="sub-title">发布订单</div>
+          <div class="content">
+            <div class="form-item">
+              <label>服务类型</label>
+              <select>
+                <option>快递代取</option>
+                <option>外卖配送</option>
+                <option>表白墙</option>
+                <option>二手交易</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>取货地址</label>
+              <input type="text" placeholder="请输入取货地址">
+            </div>
+            <div class="form-item">
+              <label>送达地址</label>
+              <input type="text" placeholder="请输入送达地址">
+            </div>
+            <div class="form-item">
+              <label>服务费用（元）</label>
+              <input type="number" placeholder="请输入费用" min="0">
+            </div>
+            <button class="btn" onclick="alert('订单发布成功！')">发布订单</button>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
           </div>
-          <div class="item">
-            <h3>已完成</h3>
-            <p>订单号：654321 | 服务类型：外卖配送 | <span class="price">¥8.00</span></p>
-            <button class="btn" onclick="alert('已跳转到评价页面')">评价骑手</button>
-            <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
-          </div>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
         </div>
-      </div>
-      <div id="service-address" class="sub-page">
-        <div class="sub-title">地址管理</div>
-        <div class="content">
-          <div class="item">
-            <h3>常用收货地址</h3>
-            <p>学生宿舍 3 栋 502</p>
-            <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
-            <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
+        <div id="service-order-manage" class="sub-page">
+          <div class="sub-title">订单管理</div>
+          <div class="content">
+            <div class="item">
+              <h3>待接单</h3>
+              <p>订单号：123456 | 服务类型：快递代取 | <span class="price">¥10.00</span></p>
+              <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
+            </div>
+            <div class="item">
+              <h3>已完成</h3>
+              <p>订单号：654321 | 服务类型：外卖配送 | <span class="price">¥8.00</span></p>
+              <button class="btn" onclick="alert('已跳转到评价页面')">评价骑手</button>
+              <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
+            </div>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
           </div>
-          <div class="item">
-            <h3>常用发货地址</h3>
-            <p>图书馆 2 楼自习室</p>
-            <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
-            <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
-          </div>
-          <button class="btn" onclick="alert('已跳转到添加地址页面')">添加新地址</button>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
         </div>
-      </div>
-      <div id="service-rider" class="sub-page">
-        <div class="sub-title">骑手端</div>
-        <div class="content">
-          <button class="btn" onclick="alert('已跳转到实名认证页面')">骑手认证</button>
-          <button class="btn" onclick="switchSubPage('service', 'rider-order')">接单管理</button>
-          <button class="btn" onclick="switchSubPage('service', 'rider-income')">收入管理</button>
-          <button class="btn" onclick="switchSubPage('service', 'rider-rank')">接单排行榜</button>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
-        </div>
-      </div>
-      <div id="service-rider-order" class="sub-page">
-        <div class="sub-title">接单管理</div>
-        <div class="content">
-          <div class="item">
-            <h3>可接订单</h3>
-            <p>订单号：123456 | 取货：宿舍 3 栋 | 送达：图书馆 | <span class="price">¥10.00</span></p>
-            <button class="btn" onclick="alert('已接单！')">接单</button>
+        <div id="service-address" class="sub-page">
+          <div class="sub-title">地址管理</div>
+          <div class="content">
+            <div class="item">
+              <h3>常用收货地址</h3>
+              <p>学生宿舍 3 栋 502</p>
+              <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
+              <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
+            </div>
+            <div class="item">
+              <h3>常用发货地址</h3>
+              <p>图书馆 2 楼自习室</p>
+              <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
+              <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
+            </div>
+            <button class="btn" onclick="alert('已跳转到添加地址页面')">添加新地址</button>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
           </div>
-          <div class="item">
-            <h3>待配送</h3>
-            <p>订单号：654321 | 取货：食堂 | 送达：教学楼 | <span class="price">¥8.00</span></p>
-            <button class="btn" onclick="alert('已更新订单状态为：配送中')">更新状态</button>
-          </div>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
         </div>
-      </div>
-      <div id="service-rider-income" class="sub-page">
-        <div class="sub-title">收入管理</div>
-        <div class="content">
-          <div class="item">
-            <h3>本月收入</h3>
-            <p><span class="price">¥1280.00</span></p>
-            <button class="btn" onclick="alert('已查看收入明细')">明细</button>
-            <button class="btn" onclick="alert('已申请提现，预计1-3个工作日到账')">申请提现</button>
+        <div id="service-rider" class="sub-page">
+          <div class="sub-title">骑手端</div>
+          <div class="content">
+            <button class="btn" onclick="alert('已跳转到实名认证页面')">骑手认证</button>
+            <button class="btn" onclick="switchSubPage('service', 'rider-order')">接单管理</button>
+            <button class="btn" onclick="switchSubPage('service', 'rider-income')">收入管理</button>
+            <button class="btn" onclick="switchSubPage('service', 'rider-rank')">接单排行榜</button>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
           </div>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
         </div>
-      </div>
-      <div id="service-rider-rank" class="sub-page">
-        <div class="sub-title">接单排行榜</div>
-        <div class="content">
-          <div class="item">
-            <p>🥇 小李：本月接单 120 单</p>
-            <p>🥈 小张：本月接单 105 单</p>
-            <p>🥉 小王：本月接单 98 单</p>
-            <p>🏅 您的排名：第 5 名（88 单）</p>
+        <div id="service-rider-order" class="sub-page">
+          <div class="sub-title">接单管理</div>
+          <div class="content">
+            <div class="item">
+              <h3>可接订单</h3>
+              <p>订单号：123456 | 取货：宿舍 3 栋 | 送达：图书馆 | <span class="price">¥10.00</span></p>
+              <button class="btn" onclick="alert('已接单！')">接单</button>
+            </div>
+            <div class="item">
+              <h3>待配送</h3>
+              <p>订单号：654321 | 取货：食堂 | 送达：教学楼 | <span class="price">¥8.00</span></p>
+              <button class="btn" onclick="alert('已更新订单状态为：配送中')">更新状态</button>
+            </div>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
           </div>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
         </div>
-      </div>
-      <div id="service-admin" class="sub-page">
-        <div class="sub-title">管理员端</div>
-        <div class="content">
-          <button class="btn" onclick="switchSubPage('service', 'admin-data')">数据统计</button>
-          <button class="btn" onclick="switchSubPage('service', 'admin-user')">用户管理</button>
-          <button class="btn" onclick="switchSubPage('service', 'admin-rider-audit')">骑手认证审核</button>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
-        </div>
-      </div>
-      <div id="service-admin-data" class="sub-page">
-        <div class="sub-title">数据统计</div>
-        <div class="content">
-          <div class="item">
-            <p>总用户数：1258 人</p>
-            <p>总订单数：3680 单</p>
-            <p>总交易金额：<span class="price">¥45680.00</span></p>
+        <div id="service-rider-income" class="sub-page">
+          <div class="sub-title">收入管理</div>
+          <div class="content">
+            <div class="item">
+              <h3>本月收入</h3>
+              <p><span class="price">¥1280.00</span></p>
+              <button class="btn" onclick="alert('已查看收入明细')">明细</button>
+              <button class="btn" onclick="alert('已申请提现，预计1-3个工作日到账')">申请提现</button>
+            </div>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
           </div>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
         </div>
-      </div>
-      <div id="service-admin-user" class="sub-page">
-        <div class="sub-title">用户管理</div>
-        <div class="content">
-          <div class="item">
-            <p>用户名：孙山果 | 手机号：138****1234 | 状态：正常</p>
-            <button class="btn btn-secondary" onclick="alert('已禁用该用户')">禁用</button>
+        <div id="service-rider-rank" class="sub-page">
+          <div class="sub-title">接单排行榜</div>
+          <div class="content">
+            <div class="item">
+              <p>🥇 小李：本月接单 120 单</p>
+              <p>🥈 小张：本月接单 105 单</p>
+              <p>🥉 小王：本月接单 98 单</p>
+              <p>🏅 您的排名：第 5 名（88 单）</p>
+            </div>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
           </div>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
         </div>
-      </div>
-      <div id="service-admin-rider-audit" class="sub-page">
-        <div class="sub-title">骑手认证审核</div>
-        <div class="content">
-          <div class="item">
-            <p>申请人：小李 | 身份证：110****1999</p>
-            <button class="btn" onclick="alert('已通过认证审核')">通过</button>
-            <button class="btn btn-secondary" onclick="alert('已拒绝认证审核')">拒绝</button>
+        <div id="service-admin" class="sub-page">
+          <div class="sub-title">管理员端</div>
+          <div class="content">
+            <button class="btn" onclick="switchSubPage('service', 'admin-data')">数据统计</button>
+            <button class="btn" onclick="switchSubPage('service', 'admin-user')">用户管理</button>
+            <button class="btn" onclick="switchSubPage('service', 'admin-rider-audit')">骑手认证审核</button>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
           </div>
-          <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+        </div>
+        <div id="service-admin-data" class="sub-page">
+          <div class="sub-title">数据统计</div>
+          <div class="content">
+            <div class="item">
+              <p>总用户数：1258 人</p>
+              <p>总订单数：3680 单</p>
+              <p>总交易金额：<span class="price">¥45680.00</span></p>
+            </div>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+          </div>
+        </div>
+        <div id="service-admin-user" class="sub-page">
+          <div class="sub-title">用户管理</div>
+          <div class="content">
+            <div class="item">
+              <p>用户名：孙山果 | 手机号：138****1234 | 状态：正常</p>
+              <button class="btn btn-secondary" onclick="alert('已禁用该用户')">禁用</button>
+            </div>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+          </div>
+        </div>
+        <div id="service-admin-rider-audit" class="sub-page">
+          <div class="sub-title">骑手认证审核</div>
+          <div class="content">
+            <div class="item">
+              <p>申请人：小李 | 身份证：110****1999</p>
+              <button class="btn" onclick="alert('已通过认证审核')">通过</button>
+              <button class="btn btn-secondary" onclick="alert('已拒绝认证审核')">拒绝</button>
+            </div>
+            <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 4. 论坛（待开发） -->
     <div id="page-forum" class="page">
-      <div class="page-title">校园论坛</div>
-      <div class="content">
-        <div class="item" style="text-align:center;padding:50px">
-          <h3>论坛功能待开发...</h3>
-          <p>敬请期待！</p>
+      <!-- 自定义headerBar（论坛专用） -->
+      <div class="header-bar fixed" style="z-index: 2021;">
+        <div class="header-bar__wrap flexbox flex-alignc" style="background: #fcd5ff; color: #c24cff;">
+          <div class="action hdbar-action__left isback" onclick="switchPage('home')">
+            <i class="iconfont icon-arrL"></i> NUXT自定义导航栏
+          </div>
+          <div class="hdbar-title center">校园论坛</div>
+          <div class="hdbar-action__right">
+            <div style="position: relative;">
+              <i class="iconfont icon-male"></i>
+              <em class="nuxt__badge">6</em>
+            </div>
+            <div class="ml-20" style="position: relative;">
+              <img src="https://picsum.photos/24/12?random=1" height="12" />
+              <em class="nuxt__badge-dot"></em>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="padding-top: 44px;">
+        <div class="page-title">校园论坛</div>
+        <div class="content">
+          <div class="item" style="text-align:center;padding:50px">
+            <h3>论坛功能待开发...</h3>
+            <p>敬请期待！</p>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 5. 我的（个人中心） -->
     <div id="page-user" class="page">
-      <div class="page-title">个人中心</div>
-      <div id="user-info" class="sub-page active">
-        <div class="content">
-          <div class="item">
-            <p>用户名：孙山果</p>
-            <p>手机号：138****1234</p>
-            <p>账户余额：<span class="price">¥25.00</span></p>
+      <!-- 复用首页headerBar -->
+      <div class="header-bar fixed transparent" style="z-index: 2021;">
+        <div class="header-bar__wrap flexbox flex-alignc" style="background: linear-gradient(to right, #f726ff, #2acfff); color: #ff0;">
+          <div class="action hdbar-action__left isback" onclick="switchPage('home')">
+            <i class="iconfont icon-close"></i>
           </div>
-          <button class="btn" onclick="switchSubPage('user', 'edit-info')">编辑个人信息</button>
-          <button class="btn" onclick="switchSubPage('user', 'payment')">支付系统</button>
-          <button class="btn" onclick="alert('已退出登录，返回首页')">退出登录</button>
+          <div class="hdbar-title center">
+            <img src="https://picsum.photos/32/16?random=1" height="16" /> <em>个人中心</em>
+          </div>
+          <div class="hdbar-action__right">
+            <div class="ml-20"><i class="iconfont icon-search"></i></div>
+            <div class="ml-20" onclick="alert('选择~~')"><i class="iconfont icon-choose"></i></div>
+          </div>
         </div>
       </div>
-      <div id="user-edit-info" class="sub-page">
-        <div class="sub-title">编辑个人信息</div>
-        <div class="content">
-          <div class="form-item">
-            <label>用户名</label>
-            <input type="text" value="孙山果">
+      
+      <div style="padding-top: 44px;">
+        <div class="page-title">个人中心</div>
+        <div id="user-info" class="sub-page active">
+          <div class="content">
+            <div class="item">
+              <p>用户名：孙山果</p>
+              <p>手机号：138****1234</p>
+              <p>账户余额：<span class="price">¥25.00</span></p>
+            </div>
+            <button class="btn" onclick="switchSubPage('user', 'edit-info')">编辑个人信息</button>
+            <button class="btn" onclick="switchSubPage('user', 'payment')">支付系统</button>
+            <button class="btn" onclick="alert('已退出登录，返回首页')">退出登录</button>
           </div>
-          <div class="form-item">
-            <label>头像</label>
-            <input type="file" accept="image/*">
-          </div>
-          <button class="btn" onclick="alert('信息修改成功！')">保存</button>
-          <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
         </div>
-      </div>
-      <div id="user-payment" class="sub-page">
-        <div class="sub-title">支付系统</div>
-        <div class="content">
-          <div class="item">
-            <h3>充值余额</h3>
-            <input type="number" placeholder="请输入充值金额" min="1">
-            <button class="btn" onclick="alert('充值成功！')">立即充值</button>
+        <div id="user-edit-info" class="sub-page">
+          <div class="sub-title">编辑个人信息</div>
+          <div class="content">
+            <div class="form-item">
+              <label>用户名</label>
+              <input type="text" value="孙山果">
+            </div>
+            <div class="form-item">
+              <label>头像</label>
+              <input type="file" accept="image/*">
+            </div>
+            <button class="btn" onclick="alert('信息修改成功！')">保存</button>
+            <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
           </div>
-          <div class="item">
-            <h3>支付方式</h3>
-            <p>微信支付 ✅</p>
-            <p>支付宝支付 ✅</p>
+        </div>
+        <div id="user-payment" class="sub-page">
+          <div class="sub-title">支付系统</div>
+          <div class="content">
+            <div class="item">
+              <h3>充值余额</h3>
+              <input type="number" placeholder="请输入充值金额" min="1">
+              <button class="btn" onclick="alert('充值成功！')">立即充值</button>
+            </div>
+            <div class="item">
+              <h3>支付方式</h3>
+              <p>微信支付 ✅</p>
+              <p>支付宝支付 ✅</p>
+            </div>
+            <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
           </div>
-          <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
         </div>
       </div>
     </div>
 
-    <!-- 自定义底部TabBar（uv3-tabbar） -->
-    <div class="uv3-tabbar">
-      <div class="uv3-tabbar__item active" onclick="switchPage('home')">
-        <div>🏠</div>
-        <div>首页</div>
-      </div>
-      <div class="uv3-tabbar__item" onclick="switchPage('chat')">
-        <div>💬</div>
-        <div>聊天</div>
-      </div>
-      <div class="uv3-tabbar__item" onclick="switchPage('service')">
-        <div>🚴</div>
-        <div>跑腿服务</div>
-      </div>
-      <div class="uv3-tabbar__item" onclick="switchPage('forum')">
-        <div>📢</div>
-        <div>论坛</div>
-      </div>
-      <div class="uv3-tabbar__item" onclick="switchPage('user')">
-        <div>👤</div>
-        <div>我的</div>
+    <!-- 自定义tabBar（完全匹配提供的组件规范） -->
+    <div class="tab-bar fixed" style="background: #b6ffff;">
+      <div class="tab-bar__wrap flexbox flex-alignc">
+        <div class="navigator on" onclick="switchPage('home')">
+          <div class="ico">
+            <i class="iconfont icon-tianjia" style="color: #22d59c; font-size: 20px;"></i>
+          </div>
+          <div class="txt" style="color: #22d59c;">Home</div>
+        </div>
+        <div class="navigator" onclick="switchPage('chat')">
+          <div class="ico">
+            <i class="iconfont icon-shezhi" style="color: #999; font-size: 20px;"></i>
+            <em class="nuxt__badge">1</em>
+          </div>
+          <div class="txt" style="color: #999;">Manage</div>
+        </div>
+        <div class="navigator" onclick="switchPage('service')">
+          <div class="ico dock">
+            <i class="dock-bg" style="background: #fb4e30;"></i>
+            <img class="iconimg" src="https://gw.alicdn.com/tfs/TB1CoEwVrvpK1RjSZFqXXcXUVXa-185-144.png?getAvatar=1" />
+          </div>
+          <div class="txt" style="color: #999;">咸鱼</div>
+        </div>
+        <div class="navigator" onclick="switchPage('forum')">
+          <div class="ico">
+            <i class="iconfont icon-face" style="color: #999; font-size: 24px;"></i>
+            <em class="nuxt__badge-dot"></em>
+          </div>
+          <div class="txt" style="color: #999;">Face</div>
+        </div>
+        <div class="navigator" onclick="switchPage('user')">
+          <div class="ico">
+            <i class="iconfont icon-search" style="color: #999; font-size: 20px;"></i>
+          </div>
+          <div class="txt" style="color: #999;">搜索</div>
+        </div>
       </div>
     </div>
   </div>
@@ -904,9 +1099,21 @@
     function switchPage(pageName) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById('page-' + pageName).classList.add('active');
-      document.querySelectorAll('.uv3-tabbar__item').forEach(t => t.classList.remove('active'));
-      const tabs = ['home', 'chat', 'service', 'forum', 'user'];
-      document.querySelectorAll('.uv3-tabbar__item')[tabs.indexOf(pageName)].classList.add('active');
+      // 更新tabBar激活状态
+      document.querySelectorAll('.navigator').forEach((nav, index) => {
+        const pages = ['home', 'chat', 'service', 'forum', 'user'];
+        nav.classList.toggle('on', pages[index] === pageName);
+        // 更新文字和图标颜色
+        const txt = nav.querySelector('.txt');
+        const ico = nav.querySelector('.iconfont');
+        if (pages[index] === pageName) {
+          txt.style.color = '#22d59c';
+          if (ico) ico.style.color = '#22d59c';
+        } else {
+          txt.style.color = '#999';
+          if (ico) ico.style.color = '#999';
+        }
+      });
       
       // 聊天页面默认显示聊天列表
       if (pageName === 'chat') {
@@ -935,7 +1142,7 @@
     // 打开聊天窗口
     function openChatWindow(title) {
       switchSubPage('chat', 'window');
-      document.querySelector('.uv3-navbar__title').textContent = title;
+      document.getElementById('chatHeaderTitle').textContent = title;
       // 滚动到消息底部
       const chatWindow = document.getElementById('chat-window');
       chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -1045,7 +1252,7 @@
       document.querySelectorAll('.uv3__emotion-tabs .item').forEach((item, i) => {
         item.classList.toggle('on', i === index);
       });
-      // 模拟动图标签页（实际项目中可替换为真实动图）
+      // 模拟动图标签页
       if (index === 1) {
         alert('已切换到动图面板');
       }
@@ -1135,11 +1342,16 @@
       closeAllPanels();
     }
 
-    // 初始化：隐藏系统TabBar（模拟UniApp的hideTabBar）
+    // tabbar点击事件（匹配提供的handleTabbar方法）
+    function handleTabbar(index) {
+      alert('tabbar索引值：' + index);
+    }
+
+    // 初始化
     window.onload = function() {
       // PC端固定750px宽度
       document.body.style.overflow = 'hidden';
-      console.log('App Launch - 隐藏系统TabBar');
+      console.log('App Launch - 自定义headerBar/tabBar初始化完成');
     };
   </script>
 </body>
