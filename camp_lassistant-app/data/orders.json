@@ -1,8 +1,11 @@
 [
   {
-    "orderId": 1001,
-    "item": "Notebook",
-    "quantity": 2,
-    "status": "pending"
+    "id": "c477d6e1-5853-46c4-bc3e-039bc1a6abb3",
+    "title": "测试订单-买水",
+    "content": "请帮忙买2瓶矿泉水，送到教学楼A区",
+    "status": "pending",
+    "creator": "1",
+    "taker": "",
+    "createTime": "2026-03-08T10:30:01.934Z"
   }
 ]

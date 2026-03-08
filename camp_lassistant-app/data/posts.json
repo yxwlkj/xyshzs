@@ -1,8 +1,9 @@
 [
   {
-    "postId": 501,
-    "author": "bob",
-    "content": "Welcome to the forum",
-    "comments": []
+    "id": "cb7a7065-12af-4dbc-8a58-b28ddcc208c4",
+    "title": "校园生活助手论坛上线啦！",
+    "content": "大家可以在这里交流跑腿需求、校园信息~",
+    "author": "1",
+    "createTime": "2026-03-08T10:30:01.935Z"
   }
 ]

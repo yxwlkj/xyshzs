@@ -1,96 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Orders</title>
-  <link rel="stylesheet" href="/App.css">
-  <link rel="stylesheet" href="/order/Order.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订单管理</title>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="App.css">
 </head>
 <body>
   <div class="container">
-    <nav>
-      <a href="index.html">首页</a>
-      <a href="chat.html">聊天</a>
-      <a href="order.html">订单</a>
-      <a href="runner.html">跑腿</a>
-      <a href="forum.html">论坛</a>
-    </nav>
-    <h2>跑腿订单</h2>
-    <div id="status" style="min-height:1em;"></div>
-    <div id="orders"></div>
-    <form id="orderForm">
-      <input name="item" placeholder="商品" required>
-      <input name="quantity" type="number" placeholder="数量" required>
-      <select name="type" required>
-        <option value="general">普通</option>
-        <option value="pickup">取件</option>
-        <option value="delivery">送货</option>
-        <option value="shopping">代购</option>
-      </select>
-      <input name="pickup" placeholder="取件地址/地点">
-      <input name="destination" placeholder="目的地地址/地点">
-      <input name="campus" placeholder="校园" value="Main" required>
-      <button type="submit">提交</button>
-    </form>
+    <h2>订单管理</h2>
+    <div class="card">
+      <h3>创建新订单</h3>
+      <div class="form-group">
+        <label>订单标题</label>
+        <input type="text" class="form-control" placeholder="例如：买水、取快递">
+      </div>
+      <div class="form-group">
+        <label>订单详情</label>
+        <textarea class="form-control" rows="4" placeholder="详细描述需求、地点等"></textarea>
+      </div>
+      <button class="btn btn-primary">提交订单</button>
+    </div>
+
+    <div class="card">
+      <h3>我的订单列表</h3>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <h4>测试订单-买水</h4>
+          <p>内容：请帮忙买2瓶矿泉水，送到教学楼A区</p>
+          <p>创建人：user1</p>
+          <span class="badge badge-pending">待接单</span>
+          <button class="btn btn-success mt-10">接单</button>
+        </li>
+      </ul>
+    </div>
   </div>
-  <script>
-    function showStatus(msg,isError=false){const s=document.getElementById('status');s.textContent=msg;s.style.color=isError?'red':'green';setTimeout(()=>{s.textContent='';},3000);}    
-    async function load() {
-      const statusNames = {pending:'待处理',assigned:'已指派',completed:'已完成'};
-      const res = await fetch('/api/orders');
-      const orders = await res.json();
-      const div = document.getElementById('orders');
-      if (orders.length === 0) {
-        div.innerHTML = '<p><em>暂无订单。</em></p>';
-      } else {
-        div.innerHTML = orders.map(o=>{
-          const runnerInfo = o.runner ? ` <span class="runner">(跑腿员: ${o.runner})</span>` : '';
-          const statusText = statusNames[o.status] || o.status;
-          return `<div class=\"order-item${o.status==='completed'? ' completed':''}\" data-id=\"${o.orderId}\">`+
-                 `#${o.orderId}: ${o.item} x${o.quantity} [${o.type}]`+
-                 ` 取件:${o.pickup||'-'} 目的地:${o.destination||'-'} 校区:${o.campus||'-'}`+
-                 ` 状态:${statusText}${runnerInfo}`+
-                 ` <button class=\"toggle\" data-id=\"${o.orderId}\">${o.status==='completed' ? '↺' : '✔'}</button>`+
-                 `</div>`;
-        }).join('');
-      }
-      // add toggle handler
-      document.querySelectorAll('.toggle').forEach(btn=>{
-        btn.addEventListener('click', async e=>{
-          const id = btn.dataset.id;
-          const itemDiv = btn.closest('.order-item');
-          const current = itemDiv.textContent.includes('(completed)');
-          const newStatus = current ? 'pending' : 'completed';
-          await fetch('/api/orders/'+id, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:newStatus})});
-          showStatus('订单已更新');
-          load();
-        });
-      });
-    }
-    document.getElementById('orderForm').addEventListener('submit', async e=>{
-      e.preventDefault();
-      const form = e.target;
-      localStorage.setItem('lastOrderItem', form.item.value);
-      const data = {
-        item: form.item.value,
-        quantity: Number(form.quantity.value),
-        type: form.type.value,
-        pickup: form.pickup.value,
-        destination: form.destination.value,
-        campus: form.campus.value
-      };
-      await fetch('/api/orders', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
-      form.reset();
-      load();
-      showStatus('订单已提交');
-    });
-    // restore last item
-    document.getElementById('orderForm').item.value = localStorage.getItem('lastOrderItem') || '';    load();
-    // nav highlight
-    document.querySelectorAll('nav a').forEach(a=>{
-      if (a.getAttribute('href') === 'order.html') a.style.fontWeight = 'bold';
-    });
-  </script>
+
+  <!-- 底部导航栏 -->
+  <div class="bottom-nav">
+    <a href="index.html">
+      <i class="fa fa-home"></i>
+      <span>首页</span>
+    </a>
+    <a href="order.html" class="active">
+      <i class="fa fa-shopping-cart"></i>
+      <span>订单</span>
+    </a>
+    <a href="forum.html">
+      <i class="fa fa-comments"></i>
+      <span>论坛</span>
+    </a>
+    <a href="chat.html">
+      <i class="fa fa-wechat"></i>
+      <span>聊天</span>
+    </a>
+  </div>
 </body>
 </html>

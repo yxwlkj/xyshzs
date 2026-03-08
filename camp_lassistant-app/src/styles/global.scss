@@ -1,0 +1,74 @@
+/* 全局重置与基础样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  font-size: 14px;
+  color: #303133;
+  background-color: #f0f2f5;
+}
+
+#app {
+  height: 100%;
+}
+
+/* 通用工具类 */
+.text-primary {
+  color: #409eff !important;
+}
+.text-success {
+  color: #67c23a !important;
+}
+.text-warning {
+  color: #e6a23c !important;
+}
+.text-danger {
+  color: #f56c6c !important;
+}
+.text-info {
+  color: #909399 !important;
+}
+
+/* 卡片通用样式 */
+.common-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+/* 统计卡片样式 */
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+.stat-card .label {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.stat-card .value {
+  font-size: 24px;
+  font-weight: 600;
+}
+.stat-card.orange {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+.stat-card.blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+.stat-card.green {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}

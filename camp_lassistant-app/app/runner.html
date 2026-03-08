@@ -1,97 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Runner Dashboard</title>
-  <link rel="stylesheet" href="/App.css">
-  <link rel="stylesheet" href="/order/Order.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>营地助手 - 跑腿员面板</title>
+  <link rel="stylesheet" href="App.css">
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div class="container">
-    <nav>
-      <a href="index.html">首页</a>
-      <a href="chat.html">聊天</a>
-      <a href="order.html">订单</a>
-      <a href="runner.html">跑腿</a>
-      <a href="forum.html">论坛</a>
-    </nav>
-    <h2>跑腿员界面</h2>
-    <div id="status" style="min-height:1em"></div>
-    <div style="margin-bottom:10px;">
-      <label>姓名： <input id="runnerName" placeholder="跑腿员"></label>
-      <button id="setRunner">设置</button>
+    <h2>跑腿员面板</h2>
+
+    <!-- 待接订单 -->
+    <div class="card">
+      <h3>待接订单</h3>
+      <div id="pending-orders">
+        <!-- 待接订单列表 -->
+      </div>
     </div>
-    <h3>可接订单</h3>
-    <div id="availableOrders"></div>
-    <h3>我的订单</h3>
-    <div id="myOrders"></div>
+
+    <!-- 我的接单 -->
+    <div class="card" style="margin-top: 20px;">
+      <h3>我的接单</h3>
+      <div id="my-taken-orders">
+        <!-- 已接订单列表 -->
+      </div>
+    </div>
   </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <a href="index.html"><i class="fas fa-home"></i> 首页</a>
+    <a href="chat.html"><i class="fas fa-comments"></i> 聊天</a>
+    <a href="order.html"><i class="fas fa-shopping-cart"></i> 订单</a>
+    <a href="runner.html" class="active"><i class="fas fa-running"></i> 跑腿员</a>
+  </div>
+
+  <!-- 引入API -->
+  <script src="../api/OrderAPI.js"></script>
+  
   <script>
-    let runner = '';
-    function showStatus(msg,isError=false){const s=document.getElementById('status');s.textContent=msg;s.style.color=isError?'red':'green';setTimeout(()=>{s.textContent='';},3000);}    
+    // 检查登录状态
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !orderAPI.token) {
+      alert('请先登录！');
+      location.href = 'index.html';
+    }
 
-    document.getElementById('setRunner').addEventListener('click', ()=>{
-      runner=document.getElementById('runnerName').value.trim();
-      if(runner){
-        localStorage.setItem('runner', runner);
-        loadLists();
-      }
-    });
-    document.getElementById('runnerName').value = localStorage.getItem('runner')||'';
-    runner = document.getElementById('runnerName').value;
-    if(runner) loadLists();
+    // 初始化页面
+    async function init() {
+      await loadOrders();
 
-    async function loadLists(){
-      if(!runner) return;
-      // available
-      const avail = await fetch('/api/orders/available').then(r=>r.json());
-      const ao = document.getElementById('availableOrders');
-      if(avail.length===0) ao.innerHTML='<p><em>暂无可接订单</em></p>';
-      else {
-        ao.innerHTML = avail.map(o=>{
-          return `<div class=\"order-item\" data-id=\"${o.orderId}\">`+
-                 `#${o.orderId} ${o.item} x${o.quantity} [${o.type}] 取件:${o.pickup||'-'} 目的地:${o.destination||'-'} 校区:${o.campus||'-'}`+
-                 ` <button class=\"accept\" data-id=\"${o.orderId}\">接单</button>`+
-                 `</div>`;
-        }).join('');
-      }
-      // my orders
-      const all = await fetch('/api/orders').then(r=>r.json());
-      const mine = all.filter(o=>o.runner===runner);
-      const mo = document.getElementById('myOrders');
-      const statusNames = {pending:'待处理',assigned:'已指派',completed:'已完成'};
-      if(mine.length===0) mo.innerHTML='<p><em>你还没有接单</em></p>';
-      else {
-        mo.innerHTML = mine.map(o=>{
-          const statusText = statusNames[o.status] || o.status;
-          return `<div class=\"order-item${o.status==='completed'? ' completed':''}\" data-id=\"${o.orderId}\">`+
-                 `#${o.orderId} ${o.item} x${o.quantity} [${o.type}] 状态:${statusText}`+
-                 (o.status!=='completed' ? ` <button class=\"complete\" data-id=\"${o.orderId}\">✔ 完成</button>` : '')+
-                 `</div>`;
-        }).join('');
+      // 监听订单状态更新
+      const socket = io({ auth: { token: orderAPI.token } });
+      socket.on('order_status_change', () => loadOrders());
+    }
+
+    // 加载订单
+    async function loadOrders() {
+      const res = await orderAPI.getOrders();
+      if (res.success) {
+        renderPendingOrders(res.data);
+        renderTakenOrders(res.data);
+      } else {
+        alert('获取订单失败：' + res.message);
       }
     }
 
-    document.body.addEventListener('click', async e=>{
-      if(e.target.classList.contains('accept')){
-        const id = e.target.dataset.id;
-        await fetch('/api/orders/'+id, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({runner, status:'assigned'})});
-        showStatus('订单已接');
-        loadLists();
-      }
-      if(e.target.classList.contains('complete')){
-        const id = e.target.dataset.id;
-        await fetch('/api/orders/'+id, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:'completed'})});
-        showStatus('订单已标记为完成');
-        loadLists();
-      }
-    });
+    // 渲染待接订单
+    function renderPendingOrders(orders) {
+      const pendingOrders = document.getElementById('pending-orders');
+      pendingOrders.innerHTML = '';
 
-    // highlight nav
-    document.querySelectorAll('nav a').forEach(a=>{
-      if (a.getAttribute('href') === 'runner.html') a.style.fontWeight = 'bold';
-    });
+      // 筛选待接订单
+      const pending = orders.filter(order => order.status === 'pending');
+
+      if (pending.length === 0) {
+        pendingOrders.innerHTML = '<div style="text-align: center; padding: 20px;">暂无待接订单</div>';
+        return;
+      }
+
+      pending.forEach(order => {
+        const orderEl = document.createElement('div');
+        orderEl.className = 'list-group-item';
+        orderEl.innerHTML = `
+          <h4>${order.title}</h4>
+          <p>${order.content}</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <div>发布者：${order.creatorName}</div>
+            <div><small>${new Date(order.createTime).toLocaleString()}</small></div>
+          </div>
+          <button class="btn btn-warning take-btn" data-id="${order.id}" style="margin-top: 10px;">
+            我要接单
+          </button>
+        `;
+
+        pendingOrders.appendChild(orderEl);
+      });
+
+      // 绑定接单事件
+      document.querySelectorAll('.take-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const orderId = e.target.dataset.id;
+          if (confirm('确定要接这个订单吗？')) {
+            const res = await orderAPI.takeOrder(orderId);
+            if (res.success) {
+              alert('接单成功！');
+              loadOrders();
+            } else {
+              alert('接单失败：' + res.message);
+            }
+          }
+        });
+      });
+    }
+
+    // 渲染已接订单
+    function renderTakenOrders(orders) {
+      const takenOrders = document.getElementById('my-taken-orders');
+      takenOrders.innerHTML = '';
+
+      // 筛选当前用户已接的订单
+      const taken = orders.filter(order => order.taker === user.id && order.status !== 'completed');
+
+      if (taken.length === 0) {
+        takenOrders.innerHTML = '<div style="text-align: center; padding: 20px;">暂无已接订单</div>';
+        return;
+      }
+
+      taken.forEach(order => {
+        const statusText = {
+          'taking': '配送中',
+          'pending': '待接单',
+          'completed': '已完成'
+        };
+
+        const orderEl = document.createElement('div');
+        orderEl.className = 'list-group-item';
+        orderEl.innerHTML = `
+          <h4>${order.title}</h4>
+          <p>${order.content}</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <div>
+              <span class="badge badge-taking">${statusText[order.status]}</span>
+              <span>发布者：${order.creatorName}</span>
+            </div>
+            <div><small>${new Date(order.updateTime).toLocaleString()}</small></div>
+          </div>
+          <button class="btn btn-success complete-btn" data-id="${order.id}" style="margin-top: 10px;">
+            标记为已完成
+          </button>
+        `;
+
+        takenOrders.appendChild(orderEl);
+      });
+
+      // 绑定完成订单事件
+      document.querySelectorAll('.complete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const orderId = e.target.dataset.id;
+          if (confirm('确定订单已完成吗？')) {
+            const res = await orderAPI.completeOrder(orderId);
+            if (res.success) {
+              alert('订单已标记为完成！');
+              loadOrders();
+            } else {
+              alert('操作失败：' + res.message);
+            }
+          }
+        });
+      });
+    }
+
+    // 初始化
+    init();
   </script>
 </body>
 </html>

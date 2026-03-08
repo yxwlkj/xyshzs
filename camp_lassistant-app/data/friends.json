@@ -1,4 +1,14 @@
 [
-  { "user": "alice", "friends": ["bob"] },
-  { "user": "bob", "friends": ["alice"] }
+  {
+    "userId": "1",
+    "friendIds": [
+      "2"
+    ]
+  },
+  {
+    "userId": "2",
+    "friendIds": [
+      "1"
+    ]
+  }
 ]

@@ -1,189 +1,925 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chat</title>
-  <link rel="stylesheet" href="/App.css">
-  <link rel="stylesheet" href="/chat/Chat.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>在线聊天 - 校园生活助手</title>
+  <!-- 引入核心依赖 -->
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.11.0/dist/emoji-picker-element.css">
+  <link rel="stylesheet" href="App.css">
+  <style>
+    /* 全局修复底部导航遮挡 */
+    body { padding-bottom: 80px !important; }
+    .chat-container { height: calc(88vh - 20px) !important; margin-bottom: 10px; }
+    @media (max-width: 768px) { .chat-container { height: calc(85vh - 20px) !important; } }
+
+    /* 聊天核心样式 */
+    .chat-container {
+      display: flex;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    .chat-sidebar {
+      width: 320px;
+      background: #f8fafc;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #fff;
+    }
+    .search-box { display: flex; gap: 8px; margin-bottom: 16px; }
+    .friend-tabs { display: flex; gap: 12px; margin-bottom: 16px; }
+    .friend-tab {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .friend-tab.active { background: #3b82f6; color: #fff; }
+    .friend-list { flex: 1; overflow-y: auto; padding: 12px; }
+    .friend-item {
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .friend-item:hover, .friend-item.active { background: #e0e7ff; }
+    .friend-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+    .friend-info { flex: 1; }
+    .friend-name { font-weight: 500; margin-bottom: 2px; }
+    .friend-status { font-size: 12px; color: #64748b; }
+    .status-online { color: #10b981; }
+    .status-offline { color: #64748b; }
+
+    .chat-main { flex: 1; display: flex; flex-direction: column; }
+    .chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chat-title { font-weight: 600; font-size: 16px; }
+    .chat-actions { margin-left: auto; display: flex; gap: 12px; }
+    .chat-actions button {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 18px;
+      transition: color 0.3s;
+    }
+    .chat-actions button:hover { color: #3b82f6; }
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #fafafa;
+    }
+    .message {
+      margin-bottom: 16px;
+      max-width: 70%;
+      display: flex;
+      gap: 8px;
+    }
+    .message.sent { margin-left: auto; flex-direction: row-reverse; }
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .message-content {
+      padding: 10px 14px;
+      border-radius: 16px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    .message.sent .message-content {
+      background: #3b82f6;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .message.received .message-content {
+      background: #e2e8f0;
+      color: #2d3748;
+      border-bottom-left-radius: 4px;
+    }
+    .message-time {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+      text-align: right;
+    }
+    .message-file, .message-image {
+      max-width: 250px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .message-image img { width: 100%; border-radius: 10px; }
+    .message-audio {
+      width: 200px;
+      padding: 8px;
+      border-radius: 8px;
+      background: #f1f5f9;
+    }
+
+    .chat-input-area {
+      padding: 16px 20px;
+      border-top: 1px solid #e2e8f0;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .input-toolbar { display: flex; gap: 12px; }
+    .toolbar-btn {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 20px;
+      transition: color 0.3s;
+    }
+    .toolbar-btn:hover { color: #3b82f6; }
+    .input-wrapper { display: flex; gap: 12px; align-items: center; }
+    .chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
+      font-size: 14px;
+    }
+    .send-btn { padding: 12px 24px; border-radius: 24px; }
+
+    /* 通话弹窗 */
+    .call-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      z-index: 99999;
+      text-align: center;
+    }
+    .call-modal h3 { margin-bottom: 20px; }
+    .call-actions { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
+    .call-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .accept-btn { background: #10b981; color: #fff; }
+    .reject-btn { background: #ef4444; color: #fff; }
+
+    /* 音视频容器 */
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: #000;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .local-video {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 100px;
+      height: 150px;
+      border-radius: 8px;
+      border: 2px solid #fff;
+    }
+    .remote-video { width: 100%; height: 100%; object-fit: cover; }
+
+    /* 表情面板 & 隐藏类 */
+    .emoji-picker { 
+      position: absolute; 
+      bottom: 80px; 
+      right: 20px; 
+      z-index: 9999;
+      width: 320px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .hidden { display: none !important; }
+    .text-danger { color: #ef4444 !important; }
+  </style>
 </head>
 <body>
   <div class="container">
-    <nav>
-      <a href="index.html">首页</a>
-      <a href="chat.html">聊天</a>
-      <a href="order.html">订单</a>
-      <a href="runner.html">跑腿</a>
-      <a href="forum.html">论坛</a>
-    </nav>
-    <h2>聊天</h2>
-    <div id="status" style="min-height:1em;"></div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <label>用户名： <input id="username" placeholder="用户名"></label>
-      <button id="setUser">设置</button>
-      <button id="callBtn" disabled>📞 呼叫</button>
+    <h2>在线聊天</h2>
+    <div class="chat-container">
+      <!-- 左侧好友/群聊列表 -->
+      <div class="chat-sidebar">
+        <div class="sidebar-header">
+          <div class="search-box">
+            <input type="text" class="form-control" placeholder="搜索好友/群聊...">
+            <button class="btn btn-primary"><i class="fa fa-search"></i></button>
+          </div>
+          <div class="friend-tabs">
+            <div class="friend-tab active">好友</div>
+            <div class="friend-tab">群聊</div>
+          </div>
+        </div>
+        <div class="friend-list">
+          <div class="friend-item active" data-id="2" data-type="private">
+            <div class="friend-avatar">R</div>
+            <div class="friend-info">
+              <div class="friend-name">runner1</div>
+              <div class="friend-status status-online">在线</div>
+            </div>
+          </div>
+          <div class="friend-item" data-id="1" data-type="private">
+            <div class="friend-avatar">U</div>
+            <div class="friend-info">
+              <div class="friend-name">user1</div>
+              <div class="friend-status status-offline">离线</div>
+            </div>
+          </div>
+          <div class="friend-item" data-id="g1" data-type="group">
+            <div class="friend-avatar">群</div>
+            <div class="friend-info">
+              <div class="friend-name">校园跑腿群</div>
+              <div class="friend-status">2人在线</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧聊天内容区 -->
+      <div class="chat-main">
+        <div class="chat-header">
+          <div class="friend-avatar">R</div>
+          <div class="chat-title">runner1</div>
+          <div class="chat-actions">
+            <button class="audio-call-btn" title="语音通话"><i class="fa fa-phone"></i></button>
+            <button class="video-call-btn" title="视频通话"><i class="fa fa-video"></i></button>
+            <button class="end-call-btn hidden" title="挂断通话" onclick="endCall()"><i class="fa fa-phone-slash text-danger"></i></button>
+            <button title="更多"><i class="fa fa-ellipsis-v"></i></button>
+          </div>
+        </div>
+        
+        <!-- 音视频容器 -->
+        <div class="video-container hidden">
+          <video class="remote-video" autoplay playsinline></video>
+          <video class="local-video" autoplay playsinline muted></video>
+        </div>
+
+        <div class="chat-messages" id="message-container">
+          <div class="message received">
+            <div class="message-avatar">R</div>
+            <div>
+              <div class="message-content">你好，需要帮忙买水吗？</div>
+              <div class="message-time">10:30</div>
+            </div>
+          </div>
+          <div class="message sent">
+            <div class="message-avatar">U</div>
+            <div>
+              <div class="message-content">是的，麻烦送到教学楼A区，谢谢！😜</div>
+              <div class="message-time">10:31</div>
+            </div>
+          </div>
+          <div class="message sent">
+            <div class="message-avatar">U</div>
+            <div>
+              <div class="message-image">
+                <img src="https://via.placeholder.com/300x200?text=矿泉水图片" alt="矿泉水">
+              </div>
+              <div class="message-time">10:32</div>
+            </div>
+          </div>
+          <div class="message received">
+            <div class="message-avatar">R</div>
+            <div>
+              <div class="message-audio">
+                <audio controls>
+                  <source src="#" type="audio/webm">
+                </audio>
+              </div>
+              <div class="message-time">10:33</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <div class="input-toolbar">
+            <label class="toolbar-btn" for="file-upload" title="文件"><i class="fa fa-file"></i></label>
+            <input type="file" id="file-upload" class="hidden" accept="*/*">
+            
+            <label class="toolbar-btn" for="image-upload" title="图片"><i class="fa fa-image"></i></label>
+            <input type="file" id="image-upload" class="hidden" accept="image/*">
+            
+            <button class="toolbar-btn voice-btn" title="语音"><i class="fa fa-microphone"></i></button>
+            <button class="toolbar-btn emoji-btn" title="表情"><i class="fa fa-smile"></i></button>
+          </div>
+          
+          <!-- 新版 Emoji 选择器 -->
+          <emoji-picker class="emoji-picker hidden" id="emoji-picker"></emoji-picker>
+          
+          <div class="input-wrapper">
+            <input type="text" class="chat-input" id="message-input" placeholder="输入消息...">
+            <button class="btn btn-primary send-btn">发送</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="friendList"></div>
-    <div>
-      <input id="newFriend" placeholder="添加好友">
-      <button id="addFriendBtn">添加</button>
-    </div>
-    <div id="chatList"></div>
-    <div id="messages"></div>
-    <form id="msgForm" style="display:none;" enctype="multipart/form-data">
-      <select id="emojiPicker"><option value="">😀</option><option value="😂">😂</option><option value="👍">👍</option><option value="🎉">🎉</option></select>
-      <input name="text" placeholder="消息" required>
-      <input type="file" id="attachment" />
-      <button type="submit">发送</button>
-    </form>
   </div>
-  <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+
+  <!-- 通话弹窗 -->
+  <div class="call-modal hidden" id="call-modal">
+    <h3 id="call-title">来电提醒</h3>
+    <p id="caller-name">runner1 正在呼叫你...</p>
+    <div class="call-actions">
+      <button class="call-btn accept-btn" id="accept-call"><i class="fa fa-phone"></i></button>
+      <button class="call-btn reject-btn" id="reject-call"><i class="fa fa-phone-slash"></i></button>
+    </div>
+  </div>
+
+  <!-- 底部导航栏 -->
+  <div class="bottom-nav">
+    <a href="index.html"><i class="fa fa-home"></i><span>首页</span></a>
+    <a href="order.html"><i class="fa fa-shopping-cart"></i><span>订单</span></a>
+    <a href="forum.html"><i class="fa fa-comments"></i><span>论坛</span></a>
+    <a href="chat.html" class="active"><i class="fa fa-wechat"></i><span>聊天</span></a>
+  </div>
+
+  <!-- 引入核心 JS 库 -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/RecordRTC/5.6.2/RecordRTC.min.js"></script>
+  
   <script>
-    function showStatus(msg, isError=false) {
-      const s = document.getElementById('status');
-      s.textContent = msg;
-      s.style.color = isError ? 'red' : 'green';
-      setTimeout(()=>{ s.textContent = ''; }, 3000);
-    }
+    // 全局变量
+    const token = localStorage.getItem('token');
+    let socket = null;
+    let currentChatId = '2';
+    let currentChatType = 'private'; // private/group
+    let peerConnection = null;
+    let localStream = null;
+    let isInCall = false; // 标记是否正在通话
+    let onlineUsers = []; // 在线用户列表
 
-    let currentChat = 'general';
-    let currentUser = '';
-    let socket;
-    async function connectSocket(token) {
-      socket = io({ auth: { token } });
-      socket.on('connect_error', err=> showStatus('Socket error: '+err.message,true));
-      socket.on('message', m=>{
-        if(m.chatId===currentChat) appendMessage(m);
+    // WebRTC配置（谷歌公共STUN服务器）
+    const RTC_CONFIG = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    // 初始化Socket连接
+    function initSocket() {
+      if (!token) {
+        alert('请先登录！');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // 连接Socket.IO
+      socket = io({
+        auth: { token },
+        transports: ['websocket']
       });
-    }
-    function appendMessage(m){
-      const div = document.getElementById('messages');
-      const time = new Date(m.timestamp).toLocaleTimeString();
-      const attachments = (m.attachments||[]).map(a=>`<a href="${a.url}" target="_blank">${a.name}</a>`).join(' ');
-      const readlist = (m.readBy||[]).join(',');
-      const html = `<p><strong>${m.sender}</strong> <span class="time">${time}</span>: ${m.text} ${attachments} <button class="delete" data-id="${m.id}">×</button><br><small>read by: ${readlist}</small></p>`;
-      div.innerHTML += html;
-      div.scrollTop = div.scrollHeight;
-    }
-    async function load() {
-      const res = await fetch('/api/chat/messages?chatId='+encodeURIComponent(currentChat), {headers:{'Authorization':'Bearer '+localStorage.getItem('jwt')}});
-      const msgs = await res.json();
-      const div = document.getElementById('messages');
-      if (msgs.length === 0) {
-        div.innerHTML = '<p><em>暂无消息。</em></p>';
-      } else {
-        div.innerHTML = '';
-        msgs.forEach(m=>appendMessage(m));
-      }
-      div.scrollTop = div.scrollHeight;
-    }
-    document.getElementById('msgForm').addEventListener('submit', async e=>{
-      showStatus('发送中...');
-      e.preventDefault();
-      const form = e.target;
-      const text = form.text.value;
-      const attachments = [];
-      const fileInput = document.getElementById('attachment');
-      if(fileInput.files.length>0){
-        // placeholder: in real app you'd upload file first and include url
-        const file = fileInput.files[0];
-        attachments.push({type:file.type, name:file.name, url:'/'+file.name});
-      }
-      const data = { chatId: currentChat, sender: currentUser, text, attachments };
-      if(socket) socket.emit('message', data);
-      await fetch('/api/chat/messages', {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('jwt')}, body:JSON.stringify(data)});
-      form.reset();
-      load();
-    });
-    document.getElementById('setUser').addEventListener('click', async ()=>{
-      const u = document.getElementById('username').value.trim();
-      if(u){
-        currentUser=u;
-        localStorage.setItem('chatUser',u);
-        // get token
-        const resp = await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u})});
-        const {token} = await resp.json();
-        localStorage.setItem('jwt', token);
-        await connectSocket(token);
-        loadUserData();
-        document.getElementById('callBtn').disabled = false;
-      }
-    });
-    // restore user
-    document.getElementById('username').value = localStorage.getItem('chatUser') || '';
-    currentUser = document.getElementById('username').value;
-    if(currentUser) loadUserData();
 
-    async function loadUserData(){
-      // friends
-      const fr = await fetch('/api/friends/'+currentUser, {headers:{'Authorization':'Bearer '+localStorage.getItem('jwt')}}).then(r=>r.json());
-      const online = await fetch('/api/users/online',{headers:{'Authorization':'Bearer '+localStorage.getItem('jwt')}}).then(r=>r.json()).catch(()=>[]);
-      const fl = document.getElementById('friendList');
-      fl.innerHTML = '<strong>好友：</strong> '+fr.join(', ') + '<br><strong>在线：</strong> '+online.join(', ');
-      // chats
-      const ch = await fetch('/api/chat/chats', {headers:{'Authorization':'Bearer '+localStorage.getItem('jwt')}}).then(r=>r.json());
-      const cl = document.getElementById('chatList');
-      cl.innerHTML = ch.map(c=>`<button class=\"chatBtn\" data-id=\"${c.id}\">${c.name}</button>`).join('');
-      document.querySelectorAll('.chatBtn').forEach(b=>{
-        b.classList.toggle('active', b.dataset.id===currentChat);
-        b.addEventListener('click', ()=>{
-          currentChat=b.dataset.id;
-          load();
-          document.querySelectorAll('.chatBtn').forEach(x=>x.classList.toggle('active', x===b));
+      // Socket连接成功
+      socket.on('connect', () => {
+        console.log('✅ Socket连接成功');
+        
+        // 拉取离线消息
+        fetch('/api/offline-messages', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).then(res => res.json()).then(data => {
+          if (data.success && data.data.length > 0) {
+            data.data.forEach(msg => renderMessage(msg, 'received'));
+            // 清空离线消息
+            fetch('/api/offline-messages/clear', {
+              method: 'POST',
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ userId: currentChatId })
+            });
+          }
         });
       });
-      document.getElementById('msgForm').style.display='block';
+
+      // 接收新消息
+      socket.on('new_message', (msg) => {
+        if (msg.to === currentChatId || msg.from === currentChatId || (currentChatType === 'group' && msg.to === currentChatId)) {
+          renderMessage(msg, 'received');
+        }
+      });
+
+      // 在线用户更新
+      socket.on('online_users_update', (users) => {
+        onlineUsers = users;
+        // 更新好友列表在线状态
+        document.querySelectorAll('.friend-item').forEach(item => {
+          const userId = item.dataset.id;
+          const isOnline = onlineUsers.some(u => u.id === userId);
+          const statusEl = item.querySelector('.friend-status');
+          if (statusEl) {
+            if (isOnline) {
+              statusEl.textContent = '在线';
+              statusEl.className = 'friend-status status-online';
+            } else {
+              statusEl.textContent = '离线';
+              statusEl.className = 'friend-status status-offline';
+            }
+          }
+        });
+      });
+
+      // 来电提醒
+      socket.on('incoming_call', (data) => {
+        document.getElementById('call-modal').classList.remove('hidden');
+        document.getElementById('call-title').textContent = data.type === 'audio' ? '语音通话' : '视频通话';
+        document.getElementById('caller-name').textContent = `${data.fromUsername} 正在呼叫你...`;
+        
+        // 保存来电信息
+        window.incomingCallData = data;
+      });
+
+      // 通话应答
+      socket.on('call_answered', (data) => {
+        if (peerConnection && data.answer) {
+          peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+          // 显示挂断按钮
+          document.querySelector('.end-call-btn').classList.remove('hidden');
+        }
+      });
+
+      // ICE候选
+      socket.on('ice_candidate', (data) => {
+        if (peerConnection && data.candidate) {
+          peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate))
+            .catch(err => console.error('添加ICE候选失败：', err));
+        }
+      });
+
+      // 通话被拒绝
+      socket.on('call_rejected', (data) => {
+        alert(data?.message || '对方拒绝了通话');
+        endCall();
+      });
+
+      // 连接错误
+      socket.on('connect_error', (err) => {
+        alert('❌ 聊天连接失败：' + err.message);
+      });
     }
-    // emoji insertion
-    document.getElementById('emojiPicker').addEventListener('change', e=>{
-      const txt = document.querySelector('#msgForm input[name="text"]');
-      txt.value += e.target.value;
-      e.target.value = '';
-      txt.focus();
-    });
 
-    // add friend
-    document.getElementById('addFriendBtn').addEventListener('click', async ()=>{
-      const f = document.getElementById('newFriend').value.trim();
-      if(f){
-        await fetch(`/api/friends/${currentUser}`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({friend:f})});
-        loadUserData();
+    // 渲染消息到聊天窗口
+    function renderMessage(msg, type) {
+      const container = document.getElementById('message-container');
+      const avatar = type === 'sent' ? 'U' : (msg.fromUsername?.charAt(0) || '?');
+      const time = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      let contentHTML = '';
+      switch (msg.type) {
+        case 'text':
+          contentHTML = `<div class="message-content">${msg.content}</div>`;
+          break;
+        case 'image':
+          contentHTML = `<div class="message-image"><img src="${msg.content}" alt="图片"></div>`;
+          break;
+        case 'file':
+          contentHTML = `<div class="message-file"><a href="${msg.content}" target="_blank"><i class="fa fa-file"></i> 下载文件</a></div>`;
+          break;
+        case 'audio':
+          contentHTML = `<div class="message-audio"><audio controls><source src="${msg.content}" type="audio/webm"></audio></div>`;
+          break;
       }
-    });
 
-    // handle delete clicks
-    document.getElementById('messages').addEventListener('click', async e=>{
-      if (e.target.classList.contains('delete')) {
-        const id = e.target.dataset.id;
-        await fetch('/api/chat/messages/'+id, { method: 'DELETE' });
-        showStatus('消息已删除');
-        load();
+      const html = `
+        <div class="message ${type}">
+          <div class="message-avatar">${avatar}</div>
+          <div>
+            ${contentHTML}
+            <div class="message-time">${time}</div>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', html);
+      // 自动滚动到底部
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // 发送文本消息
+    function sendMessage() {
+      const input = document.getElementById('message-input');
+      const content = input.value.trim();
+      if (!content) return;
+
+      const msg = {
+        to: currentChatId,
+        content,
+        type: 'text',
+        chatType: currentChatType
+      };
+
+      socket.emit('send_message', msg);
+      renderMessage({ content, time: new Date().toISOString() }, 'sent');
+      input.value = '';
+    }
+
+    // 上传文件/图片
+    function handleFileUpload(input, type) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', type);
+
+      fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      }).then(res => res.json()).then(data => {
+        if (data.success) {
+          const msg = {
+            to: currentChatId,
+            content: data.url,
+            type: type === 'image' ? 'image' : 'file',
+            chatType: currentChatType
+          };
+          socket.emit('send_message', msg);
+          renderMessage({ content: data.url, time: new Date().toISOString(), type: msg.type }, 'sent');
+        } else {
+          alert('上传失败：' + data.message);
+        }
+      }).catch(err => {
+        alert('上传出错：' + err.message);
+      });
+      input.value = '';
+    }
+
+    // 录制并发送语音消息
+    function startRecordVoice() {
+      // 检查权限
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('❌ 你的浏览器不支持录音功能，请升级浏览器！');
+        return;
       }
-    });
-    // refresh every 5 seconds
-    setInterval(load, 5000);
-    // initial load maybe after user set
 
-    // call button placeholder
-    document.getElementById('callBtn').addEventListener('click', ()=>{
-      if(!currentUser) return;
-      alert('在聊天 '+currentChat+' 中发起通话（尚未实现）');
-      // real implementation: open WebRTC connection and signal via socket
-      if(socket) socket.emit('startCall', {chatId: currentChat});
-    });
+      // 申请麦克风权限
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          const recorder = RecordRTC(stream, {
+            type: 'audio',
+            mimeType: 'audio/webm',
+            sampleRate: 44100
+          });
 
-    // highlight nav
-    document.querySelectorAll('nav a').forEach(a=>{
-      if (a.getAttribute('href') === 'chat.html') a.style.fontWeight = 'bold';
-    });
+          // 开始录音
+          recorder.startRecording();
+          alert('🎙️ 开始录音，点击“确定”结束录音');
 
-    // allow Enter key to send when focused on message field
-    const textInput = document.querySelector('#msgForm input[name="text"]');
-    textInput.addEventListener('keyup', e=>{
-      if (e.key === 'Enter') {
-        document.getElementById('msgForm').dispatchEvent(new Event('submit'));
+          // 结束录音
+          recorder.stopRecording(() => {
+            const blob = recorder.getBlob();
+            const formData = new FormData();
+            formData.append('file', blob, `voice-${Date.now()}.webm`);
+            formData.append('type', 'audio');
+
+            // 上传语音文件
+            fetch('/api/upload', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` },
+              body: formData
+            }).then(res => res.json()).then(data => {
+              if (data.success) {
+                const msg = {
+                  to: currentChatId,
+                  content: data.url,
+                  type: 'audio',
+                  chatType: currentChatType
+                };
+                socket.emit('send_message', msg);
+                renderMessage({ 
+                  content: data.url, 
+                  time: new Date().toISOString(), 
+                  type: 'audio' 
+                }, 'sent');
+              } else {
+                alert('语音上传失败：' + data.message);
+              }
+            }).catch(err => {
+              alert('语音上传出错：' + err.message);
+            });
+
+            // 停止音频流，释放麦克风
+            stream.getTracks().forEach(track => track.stop());
+          });
+        })
+        .catch(err => {
+          alert('❌ 录音权限被拒绝，请在浏览器设置中允许麦克风权限！');
+          console.error('录音权限错误：', err);
+        });
+    }
+
+    // 发起语音/视频通话
+    function startCall(callType) {
+      if (isInCall || !currentChatId) return;
+      isInCall = true;
+
+      // 检查对方是否在线
+      const isOnline = onlineUsers.some(u => u.id === currentChatId);
+      if (!isOnline) {
+        alert('❌ 对方不在线，无法发起通话');
+        isInCall = false;
+        return;
       }
-    });
+
+      // 初始化PeerConnection
+      peerConnection = new RTCPeerConnection(RTC_CONFIG);
+      
+      // 监听ICE候选
+      peerConnection.onicecandidate = (e) => {
+        if (e.candidate) {
+          socket.emit('ice_candidate', {
+            to: currentChatId,
+            candidate: e.candidate
+          });
+        }
+      };
+
+      // 监听远程流
+      peerConnection.ontrack = (e) => {
+        document.querySelector('.remote-video').srcObject = e.streams[0];
+      };
+
+      // 监听连接状态变化
+      peerConnection.onconnectionstatechange = () => {
+        if (peerConnection.connectionState === 'disconnected' || 
+            peerConnection.connectionState === 'closed' || 
+            peerConnection.connectionState === 'failed') {
+          endCall();
+        }
+      };
+
+      // 获取本地音视频流
+      navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: callType === 'video'
+      }).then(stream => {
+        localStream = stream;
+        // 显示音视频容器
+        document.querySelector('.video-container').classList.remove('hidden');
+        document.querySelector('.local-video').srcObject = stream;
+        document.querySelector('.end-call-btn').classList.remove('hidden');
+
+        // 添加流到PeerConnection
+        stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+        // 创建通话Offer
+        peerConnection.createOffer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: callType === 'video'
+        }).then(offer => {
+          peerConnection.setLocalDescription(offer);
+          // 发送通话请求
+          socket.emit('call_user', {
+            to: currentChatId,
+            type: callType,
+            offer: offer
+          });
+        }).catch(err => {
+          alert('创建通话请求失败：' + err.message);
+          endCall();
+        });
+      }).catch(err => {
+        alert(`❌ 请允许${callType === 'audio' ? '麦克风' : '摄像头和麦克风'}权限！`);
+        isInCall = false;
+        console.error(err);
+      });
+    }
+
+    // 接听通话
+    function acceptCall() {
+      if (isInCall) return;
+      isInCall = true;
+      const data = window.incomingCallData;
+      document.getElementById('call-modal').classList.add('hidden');
+
+      // 初始化PeerConnection
+      peerConnection = new RTCPeerConnection(RTC_CONFIG);
+      
+      // 监听ICE候选
+      peerConnection.onicecandidate = (e) => {
+        if (e.candidate) {
+          socket.emit('ice_candidate', {
+            to: data.from,
+            candidate: e.candidate
+          });
+        }
+      };
+
+      // 监听远程流
+      peerConnection.ontrack = (e) => {
+        document.querySelector('.remote-video').srcObject = e.streams[0];
+      };
+
+      // 监听连接状态
+      peerConnection.onconnectionstatechange = () => {
+        if (peerConnection.connectionState === 'disconnected' || 
+            peerConnection.connectionState === 'closed' || 
+            peerConnection.connectionState === 'failed') {
+          endCall();
+        }
+      };
+
+      // 设置远程描述
+      peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer))
+        .then(() => {
+          // 获取本地流
+          return navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: data.type === 'video'
+          });
+        })
+        .then(stream => {
+          localStream = stream;
+          // 显示音视频容器
+          document.querySelector('.video-container').classList.remove('hidden');
+          document.querySelector('.local-video').srcObject = stream;
+          document.querySelector('.end-call-btn').classList.remove('hidden');
+
+          // 添加流到PeerConnection
+          stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+          
+          // 创建应答
+          return peerConnection.createAnswer();
+        })
+        .then(answer => {
+          peerConnection.setLocalDescription(answer);
+          // 发送应答
+          socket.emit('answer_call', {
+            to: data.from,
+            answer: answer
+          });
+        })
+        .catch(err => {
+          alert('❌ 接听通话失败：' + err.message);
+          isInCall = false;
+          socket.emit('reject_call', { to: data.from });
+        });
+    }
+
+    // 拒绝通话
+    function rejectCall() {
+      document.getElementById('call-modal').classList.add('hidden');
+      if (window.incomingCallData) {
+        socket.emit('reject_call', { to: window.incomingCallData.from });
+        window.incomingCallData = null;
+      }
+    }
+
+    // 结束通话
+    function endCall() {
+      if (!isInCall) return;
+      isInCall = false;
+
+      // 隐藏挂断按钮
+      document.querySelector('.end-call-btn').classList.add('hidden');
+      
+      // 停止本地流
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+
+      // 关闭PeerConnection
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+
+      // 隐藏视频容器
+      const videoContainer = document.querySelector('.video-container');
+      videoContainer.classList.add('hidden');
+      videoContainer.querySelector('.remote-video').srcObject = null;
+      videoContainer.querySelector('.local-video').srcObject = null;
+
+      // 通知对方
+      if (currentChatId) {
+        socket.emit('call_rejected', { to: currentChatId });
+      }
+    }
+
+    // 初始化Emoji表情选择器
+    function initEmojiPicker() {
+      const picker = document.getElementById('emoji-picker');
+      const input = document.getElementById('message-input');
+      
+      // 表情选择事件
+      picker.addEventListener('emoji-click', (e) => {
+        input.value += e.detail.emoji;
+        input.focus();
+      });
+      
+      // 点击表情按钮切换显示
+      document.querySelector('.emoji-btn').addEventListener('click', () => {
+        picker.classList.toggle('hidden');
+      });
+      
+      // 点击页面其他区域关闭表情面板
+      document.addEventListener('click', (e) => {
+        if (!picker.contains(e.target) && !e.target.closest('.emoji-btn')) {
+          picker.classList.add('hidden');
+        }
+      });
+    }
+
+    // 页面加载完成初始化
+    window.onload = function() {
+      // 初始化核心功能
+      initSocket();
+      initEmojiPicker();
+
+      // 好友/群聊切换
+      document.querySelectorAll('.friend-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.friend-item').forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          currentChatId = item.dataset.id;
+          currentChatType = item.dataset.type;
+          document.querySelector('.chat-title').textContent = item.querySelector('.friend-name').textContent;
+          document.querySelector('.chat-header .friend-avatar').textContent = item.querySelector('.friend-avatar').textContent;
+        });
+      });
+
+      // 发送消息（按钮+回车）
+      document.querySelector('.send-btn').addEventListener('click', sendMessage);
+      document.getElementById('message-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+      });
+
+      // 文件/图片上传
+      document.getElementById('file-upload').addEventListener('change', (e) => handleFileUpload(e.target, 'file'));
+      document.getElementById('image-upload').addEventListener('change', (e) => handleFileUpload(e.target, 'image'));
+
+      // 语音录制
+      document.querySelector('.voice-btn').addEventListener('click', startRecordVoice);
+
+      // 发起通话
+      document.querySelector('.audio-call-btn').addEventListener('click', () => startCall('audio'));
+      document.querySelector('.video-call-btn').addEventListener('click', () => startCall('video'));
+
+      // 接听/拒绝通话
+      document.getElementById('accept-call').addEventListener('click', acceptCall);
+      document.getElementById('reject-call').addEventListener('click', rejectCall);
+
+      // 好友/群聊标签切换
+      document.querySelectorAll('.friend-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.friend-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        });
+      });
+    };
   </script>
 </body>
 </html>
