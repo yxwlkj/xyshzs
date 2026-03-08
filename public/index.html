@@ -5,201 +5,109 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>校园跑腿 - 微信风格聊天</title>
   <style>
-    /* 全局样式 */
+    /* ========== 全局基础样式（匹配UniApp重置样式） ========== */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
-    body { background-color: #f8f9fa; padding-bottom: 60px; }
-    /* 底部 Tab 导航 */
-    .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #e5e5e5; }
-    .tab-item { text-align: center; font-size: 12px; color: #666; cursor: pointer; }
-    .tab-item.active { color: #ff6b35; }
-    /* 页面容器（主页面） */
+    body { background-color: #f8f9fa; padding-bottom: 0; }
+    /* PC端固定750px宽度布局 */
+    #app {
+      max-width: 750px;
+      margin: 0 auto;
+      position: relative;
+      min-height: 100vh;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    /* Flex布局工具类 */
+    .flexbox { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex1 { flex: 1; }
+    .flex-alignc { align-items: center; }
+    .flex-justifyc { justify-content: center; }
+    /* 通用样式 */
     .page { display: none; }
     .page.active { display: block; }
-    /* 子页面容器 */
     .sub-page { display: none; }
     .sub-page.active { display: block; }
-    /* 通用样式 */
-    .page-title { padding: 16px; font-size: 20px; font-weight: bold; text-align: center; background: white; border-bottom: 1px solid #e5e5e5; }
-    .sub-title { padding: 12px; font-size: 18px; font-weight: bold; background: white; border-bottom: 1px solid #e5e5e5; }
-    .content { padding: 16px; }
     .item { background: white; margin: 10px 0; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .btn { padding: 8px 16px; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+    .btn { padding: 8px 16px; background: #07c160; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
     .btn-secondary { background: #666; }
-    .btn-outline { background: white; color: #ff6b35; border: 1px solid #ff6b35; }
-    .form-item { margin: 15px 0; }
-    .form-item label { display: block; margin-bottom: 5px; }
-    .form-item input, .form-item select, .form-item textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    .btn-outline { background: white; color: #07c160; border: 1px solid #07c160; }
     .price { color: #ff6b35; font-weight: bold; }
 
-    /* ========== 聊天模块升级样式 ========== */
-    /* 渐变导航栏（仿 Flutter LinearGradient） */
-    .chat-gradient-header {
-      background: linear-gradient(135deg, #0091EA, #07C160);
-      color: white;
+    /* ========== UniApp风格自定义导航栏（uv3-navbar） ========== */
+    .uv3-navbar {
+      background: linear-gradient(to right, #07c160, #0000ff);
+      color: #fff;
       padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: relative;
+      z-index: 2024;
+      height: 44px;
+      line-height: 44px;
     }
-    .chat-header-title {
+    .uv3-navbar__back {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .uv3-navbar__title {
       font-size: 18px;
       font-weight: bold;
-    }
-    /* 下拉菜单（PopupMenuButton） */
-    .popup-menu {
-      position: relative;
-      cursor: pointer;
-    }
-    .popup-menu-content {
       position: absolute;
-      top: 40px;
-      right: 0;
-      background: #353535;
-      color: white;
-      border-radius: 4px;
-      width: 150px;
-      z-index: 999;
-      display: none;
+      left: 50%;
+      transform: translateX(-50%);
     }
-    .popup-menu-content.active {
-      display: block;
-    }
-    .popup-menu-item {
-      padding: 10px 16px;
+    .uv3-navbar__right {
       display: flex;
       align-items: center;
-      cursor: pointer;
+      gap: 10px;
     }
-    .popup-menu-item:hover {
-      background: #444;
-    }
-    .popup-menu-icon {
-      margin-right: 8px;
-      font-size: 16px;
-    }
-    /* 聊天列表样式优化 */
-    .chat-list { padding: 0; }
-    .chat-item {
-      display: flex;
-      padding: 12px 16px;
+
+    /* ========== UniApp风格底部TabBar（uv3-tabbar） ========== */
+    .uv3-tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 750px;
+      max-width: 100%;
       background: white;
-      border-bottom: 1px solid #f0f0f0;
-      margin-bottom: 0;
-      border-radius: 0;
-    }
-    .chat-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      margin-right: 12px;
-    }
-    .chat-info { flex: 1; }
-    .chat-name { font-weight: bold; margin-bottom: 4px; }
-    .chat-content { color: #666; font-size: 14px; }
-    .chat-time { font-size: 12px; color: #999; }
-    /* 朋友圈九宫格图片（ImageGroup） */
-    .image-group {
-      margin: 10px 0;
-    }
-    .image-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
-    }
-    .image-item {
-      aspect-ratio: 1/1;
-      background: #f5f5f5;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      justify-content: space-around;
+      padding: 8px 0;
+      border-top: 1px solid #e5e5e5;
+      z-index: 2025;
     }
-    .image-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .image-add {
-      font-size: 30px;
-      color: #999;
-      cursor: pointer;
-    }
-    /* 按住说话语音功能 */
-    .voice-btn {
-      background: #e5e5e5;
-      border-radius: 20px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .uv3-tabbar__item {
+      text-align: center;
+      font-size: 12px;
       color: #666;
       cursor: pointer;
-      margin-right: 10px;
+      padding: 5px 0;
     }
-    .voice-panel {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 20px 40px;
-      border-radius: 10px;
-      font-size: 18px;
-      display: none;
-      z-index: 999;
+    .uv3-tabbar__item.active {
+      color: #07c160;
     }
-    .voice-panel.active {
-      display: block;
-    }
-    /* 聊天窗口样式升级 */
-    .chat-window {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #f5f5f5;
-      z-index: 999;
-    }
-    .chat-window.active {
-      display: block;
-    }
-    .chat-window-header {
-      background: linear-gradient(135deg, #0091EA, #07C160);
-      color: white;
-      padding: 12px 16px;
+
+    /* ========== 微信风格聊天核心样式 ========== */
+    /* 聊天容器布局（导航+内容+底部操作栏） */
+    .chat-container {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      max-height: 100vh;
     }
-    .chat-back {
-      margin-right: 12px;
-      cursor: pointer;
-      font-size: 18px;
-    }
-    .chat-window-title {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .chat-window-actions {
-      margin-left: auto;
-      display: flex;
-      gap: 16px;
-    }
-    .chat-window-actions button {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .chat-messages {
-      height: calc(100% - 130px);
+    /* 聊天内容区 */
+    .chat-content {
+      flex: 1;
       padding: 16px;
       overflow-y: auto;
+      background-color: #f5f5f5;
+      padding-bottom: 80px;
     }
+    /* 消息气泡样式 */
     .msg-item {
       margin: 10px 0;
       display: flex;
@@ -221,6 +129,7 @@
       border-radius: 8px;
       max-width: 70%;
       position: relative;
+      word-break: break-all;
     }
     .msg-other .msg-bubble {
       background: white;
@@ -228,179 +137,319 @@
       border-top-left-radius: 0;
     }
     .msg-mine .msg-bubble {
-      background: #07C160;
+      background: #07c160;
       color: white;
       border-top-right-radius: 0;
     }
-    .msg-image {
+    /* 图片/视频预览样式 */
+    .msg-media {
       max-width: 150px;
       border-radius: 8px;
-    }
-    .chat-input-area {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      padding: 10px 16px;
-      background: white;
-      border-top: 1px solid #e5e5e5;
-      display: flex;
-      align-items: center;
-    }
-    .chat-input-switch {
-      display: flex;
-      gap: 10px;
-      margin-right: 10px;
-    }
-    .chat-input-switch button {
-      background: transparent;
-      border: none;
-      font-size: 20px;
-      color: #666;
       cursor: pointer;
     }
-    .chat-input {
+    .media-preview {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .media-preview.active {
+      display: flex;
+    }
+    .media-preview-content {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .media-preview-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+    }
+    /* 红包样式 */
+    .red-packet {
+      background: linear-gradient(to right, #ff6b35, #ff3a3a);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+    }
+    /* 朋友圈入口样式 */
+    .moments-entry {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+    }
+
+    /* ========== 增强版聊天编辑框（uv3__chattoolbar） ========== */
+    .uv3__chattoolbar {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 750px;
+      max-width: 100%;
+      background: white;
+      border-top: 1px solid #e5e5e5;
+      padding: 10px 16px;
+      z-index: 2000;
+    }
+    .uv3__chattoolbar-editor {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .uv3__chattoolbar-editor .btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0;
+    }
+    .uv3__chattoolbar-editor .editor {
       flex: 1;
+    }
+    .uv3-input {
+      width: 100%;
       padding: 8px 12px;
       border: 1px solid #e5e5e5;
       border-radius: 20px;
       outline: none;
+      min-height: 40px;
+      max-height: 120px;
+      resize: none;
     }
-    .chat-send-btn {
-      background: #07C160;
-      color: white;
-      border: none;
+    /* 语音操作区域 */
+    .uv3__voice-handle {
+      background: #e5e5e5;
       border-radius: 20px;
-      padding: 8px 16px;
-      margin-left: 10px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      cursor: pointer;
+      width: 100%;
+    }
+    /* 语音面板（长按说话） */
+    .voice-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      font-size: 20px;
+      display: none;
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .voice-panel.active {
+      display: flex;
+    }
+    .voice-panel__icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+    /* 表情/加号操作栏 */
+    .uv3__chattoolbar-operate {
+      background: white;
+      padding: 10px;
+      border-top: 1px solid #e5e5e5;
+      display: none;
+    }
+    .uv3__chattoolbar-operate.active {
+      display: block;
+    }
+    /* 表情面板 */
+    .uv3__chattoolbar-emotion {
+      height: 200px;
+    }
+    .uv3__emotion-tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e5e5;
+      padding-bottom: 5px;
+      margin-bottom: 5px;
+    }
+    .uv3__emotion-tabs .item {
+      flex: 1;
+      text-align: center;
+      padding: 5px;
+      margin: 0;
+      box-shadow: none;
+      border-radius: 0;
       cursor: pointer;
     }
-
-    /* 适配小程序/APP/浏览器 */
-    @media (max-width: 768px) {
-      .content { padding: 10px; }
-      .item { margin: 5px 0; padding: 10px; }
+    .uv3__emotion-tabs .item.on {
+      color: #07c160;
+      border-bottom: 2px solid #07c160;
     }
+    .uv3__emotion-cells {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 5px;
+      overflow-y: auto;
+      height: calc(100% - 40px);
+    }
+    .uv3__emotion-cells .emoj {
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px;
+    }
+    /* 加号操作面板 */
+    .uv3__chattoolbar-pluschoose {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 10px;
+    }
+    .uv3__plusbtns-cells {
+      width: 20%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+    .uv3__plusbtns-cells .icon {
+      width: 40px;
+      height: 40px;
+      background: #f5f5f5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 5px;
+    }
+    .uv3__plusbtns-cells .label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* ========== 其他页面样式（保持不变） ========== */
+    .page-title { padding: 16px; font-size: 20px; font-weight: bold; text-align: center; background: white; border-bottom: 1px solid #e5e5e5; }
+    .sub-title { padding: 12px; font-size: 18px; font-weight: bold; background: white; border-bottom: 1px solid #e5e5e5; }
+    .content { padding: 16px; }
+    .form-item { margin: 15px 0; }
+    .form-item label { display: block; margin-bottom: 5px; }
+    .form-item input, .form-item select, .form-item textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
   </style>
 </head>
 <body>
-  <!-- 1. 首页（登录/注册） -->
-  <div id="page-home" class="page active">
-    <div class="page-title">校园跑腿</div>
-    <!-- 首页子页面：登录 -->
-    <div id="home-login" class="sub-page active">
-      <div class="content">
-        <div class="form-item">
-          <label>手机号</label>
-          <input type="tel" placeholder="请输入手机号" id="login-phone">
+  <div id="app">
+    <!-- 1. 首页（登录/注册） -->
+    <div id="page-home" class="page active">
+      <div class="page-title">校园跑腿</div>
+      <!-- 首页子页面：登录 -->
+      <div id="home-login" class="sub-page active">
+        <div class="content">
+          <div class="form-item">
+            <label>手机号</label>
+            <input type="tel" placeholder="请输入手机号" id="login-phone">
+          </div>
+          <div class="form-item">
+            <label>密码</label>
+            <input type="password" placeholder="请输入密码" id="login-pwd">
+          </div>
+          <button class="btn" onclick="alert('登录成功！')">密码登录</button>
+          <button class="btn btn-outline" onclick="switchSubPage('home', 'register')">注册账号</button>
+          <button class="btn btn-secondary" onclick="alert('已跳转到个人信息管理页面')">个人信息管理</button>
         </div>
-        <div class="form-item">
-          <label>密码</label>
-          <input type="password" placeholder="请输入密码" id="login-pwd">
-        </div>
-        <button class="btn" onclick="alert('登录成功！')">密码登录</button>
-        <button class="btn btn-outline" onclick="switchSubPage('home', 'register')">注册账号</button>
-        <button class="btn btn-secondary" onclick="alert('已跳转到个人信息管理页面')">个人信息管理</button>
       </div>
-    </div>
-    <!-- 首页子页面：注册 -->
-    <div id="home-register" class="sub-page">
-      <div class="content">
-        <div class="form-item">
-          <label>用户名</label>
-          <input type="text" placeholder="请输入用户名" id="reg-name">
-        </div>
-        <div class="form-item">
-          <label>手机号</label>
-          <input type="tel" placeholder="请输入手机号" id="reg-phone">
-        </div>
-        <div class="form-item">
-          <label>密码</label>
-          <input type="password" placeholder="请输入密码" id="reg-pwd">
-        </div>
-        <button class="btn" onclick="alert('注册成功！')">完成注册</button>
-        <button class="btn btn-outline" onclick="switchSubPage('home', 'login')">返回登录</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. 聊天（微信风格全功能） -->
-  <div id="page-chat" class="page">
-    <!-- 渐变导航栏 + 下拉菜单 -->
-    <div class="chat-gradient-header">
-      <div class="chat-header-title">微信风格聊天</div>
-      <div class="popup-menu" onclick="togglePopupMenu()">
-        <span>⋮</span>
-        <div class="popup-menu-content" id="popupMenu">
-          <div class="popup-menu-item" onclick="handlePopupMenu(0)">
-            <span class="popup-menu-icon">👥</span>
-            <span>发起群聊</span>
+      <!-- 首页子页面：注册 -->
+      <div id="home-register" class="sub-page">
+        <div class="content">
+          <div class="form-item">
+            <label>用户名</label>
+            <input type="text" placeholder="请输入用户名" id="reg-name">
           </div>
-          <div class="popup-menu-item" onclick="handlePopupMenu(1)">
-            <span class="popup-menu-icon">➕</span>
-            <span>添加朋友</span>
+          <div class="form-item">
+            <label>手机号</label>
+            <input type="tel" placeholder="请输入手机号" id="reg-phone">
           </div>
-          <div class="popup-menu-item" onclick="handlePopupMenu(2)">
-            <span class="popup-menu-icon">📷</span>
-            <span>扫一扫</span>
+          <div class="form-item">
+            <label>密码</label>
+            <input type="password" placeholder="请输入密码" id="reg-pwd">
           </div>
-          <div class="popup-menu-item" onclick="handlePopupMenu(3)">
-            <span class="popup-menu-icon">💳</span>
-            <span>收付款</span>
-          </div>
+          <button class="btn" onclick="alert('注册成功！')">完成注册</button>
+          <button class="btn btn-outline" onclick="switchSubPage('home', 'login')">返回登录</button>
         </div>
       </div>
     </div>
 
-    <!-- 聊天子页面：聊天列表 -->
-    <div id="chat-list" class="sub-page active">
-      <div class="content" style="padding:0;">
+    <!-- 2. 聊天（UniApp+Vue3风格+微信全功能） -->
+    <div id="page-chat" class="page chat-container">
+      <!-- 自定义导航栏（uv3-navbar） -->
+      <div class="uv3-navbar">
+        <div class="uv3-navbar__back" onclick="switchSubPage('chat', 'list')">
+          <span>←</span>
+          <span style="margin-left:5px">返回</span>
+        </div>
+        <div class="uv3-navbar__title">微信风格聊天</div>
+        <div class="uv3-navbar__right">
+          <span onclick="openRedPacket()">🧧</span>
+          <span onclick="switchSubPage('chat', 'moments')">朋友圈</span>
+        </div>
+      </div>
+
+      <!-- 聊天子页面：聊天列表 -->
+      <div id="chat-list" class="sub-page active chat-content">
+        <!-- 朋友圈入口 -->
+        <div class="moments-entry" onclick="switchSubPage('chat', 'moments')">
+          <img src="https://picsum.photos/48/48?random=99" style="width:48px;height:48px;border-radius:50%;margin-right:12px;">
+          <div>
+            <div style="font-weight:bold;">朋友圈</div>
+            <div style="font-size:14px;color:#666;">小张发布了新的朋友圈</div>
+          </div>
+        </div>
         <!-- 聊天列表 -->
-        <div class="chat-list">
-          <!-- 朋友圈入口 -->
-          <div class="chat-item" onclick="switchSubPage('chat', 'moments')">
-            <img src="https://picsum.photos/48/48?random=99" class="chat-avatar">
-            <div class="chat-info">
-              <div class="chat-name">朋友圈</div>
-              <div class="chat-content">小张发布了新的朋友圈</div>
-            </div>
-            <div class="chat-time">10:30</div>
+        <div class="msg-item" onclick="openChatWindow('小李（骑手）')">
+          <img src="https://picsum.photos/48/48?random=1" class="msg-avatar">
+          <div class="msg-bubble">
+            <div style="font-weight:bold;">小李（骑手）</div>
+            <div style="font-size:14px;color:#666;">您的订单已送达！</div>
+            <div style="font-size:12px;color:#999;float:right;">10:20</div>
           </div>
-          <!-- 私聊好友 -->
-          <div class="chat-item" onclick="openChatWindow('小李（骑手）')">
-            <img src="https://picsum.photos/48/48?random=1" class="chat-avatar">
-            <div class="chat-info">
-              <div class="chat-name">小李（骑手）</div>
-              <div class="chat-content">您的订单已送达！</div>
-            </div>
-            <div class="chat-time">10:20</div>
+        </div>
+        <div class="msg-item" onclick="openChatWindow('校园跑腿交流群')">
+          <img src="https://picsum.photos/48/48?random=2" class="msg-avatar">
+          <div class="msg-bubble">
+            <div style="font-weight:bold;">校园跑腿交流群</div>
+            <div style="font-size:14px;color:#666;">小王：求代取快递！</div>
+            <div style="font-size:12px;color:#999;float:right;">09:45</div>
           </div>
-          <!-- 群聊 -->
-          <div class="chat-item" onclick="openChatWindow('校园跑腿交流群')">
-            <img src="https://picsum.photos/48/48?random=2" class="chat-avatar">
-            <div class="chat-info">
-              <div class="chat-name">校园跑腿交流群</div>
-              <div class="chat-content">小王：求代取快递！</div>
-            </div>
-            <div class="chat-time">09:45</div>
-          </div>
-          <!-- 好友申请提醒 -->
-          <div class="chat-item" onclick="switchSubPage('chat', 'friend-request')">
-            <img src="https://picsum.photos/48/48?random=3" class="chat-avatar">
-            <div class="chat-info">
-              <div class="chat-name">好友申请</div>
-              <div class="chat-content">3条新申请</div>
-            </div>
-            <div class="chat-time">08:30</div>
+        </div>
+        <div class="msg-item" onclick="switchSubPage('chat', 'friend-request')">
+          <img src="https://picsum.photos/48/48?random=3" class="msg-avatar">
+          <div class="msg-bubble">
+            <div style="font-weight:bold;">好友申请</div>
+            <div style="font-size:14px;color:#666;">3条新申请</div>
+            <div style="font-size:12px;color:#999;float:right;">08:30</div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 聊天子页面：朋友圈（九宫格图片） -->
-    <div id="chat-moments" class="sub-page">
-      <div class="sub-title">朋友圈</div>
-      <div class="content">
+      <!-- 聊天子页面：朋友圈 -->
+      <div id="chat-moments" class="sub-page chat-content">
         <div class="item">
           <div style="display:flex;align-items:center;margin-bottom:10px;">
             <img src="https://picsum.photos/40/40?random=99" style="width:40px;height:40px;border-radius:50%;margin-right:10px;">
@@ -410,74 +459,28 @@
             </div>
           </div>
           <div style="margin-bottom:10px;">今天天气真好，适合出门！</div>
-          <!-- 九宫格图片（ImageGroup） -->
-          <div class="image-group">
-            <div class="image-grid">
-              <div class="image-item">
-                <img src="https://picsum.photos/200/200?random=10" onclick="previewImage(this.src)">
-              </div>
-              <div class="image-item">
-                <img src="https://picsum.photos/200/200?random=11" onclick="previewImage(this.src)">
-              </div>
-              <div class="image-item">
-                <img src="https://picsum.photos/200/200?random=12" onclick="previewImage(this.src)">
-              </div>
-              <div class="image-item">
-                <img src="https://picsum.photos/200/200?random=13" onclick="previewImage(this.src)">
-              </div>
-              <div class="image-item">
-                <img src="https://picsum.photos/200/200?random=14" onclick="previewImage(this.src)">
-              </div>
-              <div class="image-item">
-                <img src="https://picsum.photos/200/200?random=15" onclick="previewImage(this.src)">
-              </div>
-              <div class="image-item">
-                <span class="image-add" onclick="chooseImage()">+</span>
-              </div>
+          <!-- 九宫格图片 -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:10px;">
+            <div style="aspect-ratio:1/1;background:#f5f5f5;overflow:hidden;">
+              <img src="https://picsum.photos/200/200?random=10" class="msg-media" onclick="previewMedia(this.src, 'image')">
             </div>
+            <div style="aspect-ratio:1/1;background:#f5f5f5;overflow:hidden;">
+              <img src="https://picsum.photos/200/200?random=11" class="msg-media" onclick="previewMedia(this.src, 'image')">
+            </div>
+            <div style="aspect-ratio:1/1;background:#f5f5f5;overflow:hidden;">
+              <img src="https://picsum.photos/200/200?random=12" class="msg-media" onclick="previewMedia(this.src, 'image')">
+            </div>
+          </div>
+          <div style="font-size:12px;color:#999;">
+            <span onclick="alert('点赞成功')">👍 点赞</span>
+            <span style="margin-left:10px;" onclick="alert('已评论')">💬 评论</span>
           </div>
         </div>
-
-        <div class="item">
-          <div style="display:flex;align-items:center;margin-bottom:10px;">
-            <img src="https://picsum.photos/40/40?random=88" style="width:40px;height:40px;border-radius:50%;margin-right:10px;">
-            <div>
-              <div style="font-weight:bold;">小李</div>
-              <div style="font-size:12px;color:#999;">2小时前</div>
-            </div>
-          </div>
-          <div style="margin-bottom:10px;">今天跑了10单，累并快乐着！</div>
-          <!-- 单张图片 -->
-          <div class="image-group">
-            <div class="image-grid" style="grid-template-columns:1fr;">
-              <div class="image-item">
-                <img src="https://picsum.photos/300/200?random=20" onclick="previewImage(this.src)">
-              </div>
-            </div>
-          </div>
-        </div>
-
         <button class="btn btn-outline" onclick="switchSubPage('chat', 'list')">返回</button>
       </div>
-    </div>
 
-    <!-- 聊天子页面：添加好友 -->
-    <div id="chat-add-friend" class="sub-page">
-      <div class="sub-title">添加好友</div>
-      <div class="content">
-        <div class="form-item">
-          <label>搜索用户名/手机号</label>
-          <input type="text" placeholder="请输入搜索内容" id="search-friend">
-        </div>
-        <button class="btn" onclick="alert('找到用户：小张，可发送好友申请')">搜索</button>
-        <button class="btn btn-outline" onclick="switchSubPage('chat', 'list')">返回</button>
-      </div>
-    </div>
-
-    <!-- 聊天子页面：好友申请列表 -->
-    <div id="chat-friend-request" class="sub-page">
-      <div class="sub-title">好友申请</div>
-      <div class="content">
+      <!-- 聊天子页面：好友申请 -->
+      <div id="chat-friend-request" class="sub-page chat-content">
         <div class="item">
           <p>申请人：小张</p>
           <p>备注：我是同班同学</p>
@@ -492,51 +495,10 @@
         </div>
         <button class="btn btn-outline" onclick="switchSubPage('chat', 'list')">返回</button>
       </div>
-    </div>
 
-    <!-- 聊天子页面：聊天设置 -->
-    <div id="chat-settings" class="sub-page">
-      <div class="sub-title">聊天设置</div>
-      <div class="content">
-        <div class="item">
-          <p>新消息提醒</p>
-          <input type="checkbox" checked> 弹框提醒
-          <input type="checkbox" checked> 声音提醒
-        </div>
-        <div class="item">
-          <p>新消息提示音</p>
-          <select>
-            <option>提示音1</option>
-            <option>提示音2</option>
-            <option>提示音3</option>
-            <option>提示音4</option>
-            <option>提示音5</option>
-            <option>提示音6</option>
-          </select>
-        </div>
-        <div class="item">
-          <p>在线状态</p>
-          <button class="btn" onclick="alert('已设置为在线')">在线</button>
-          <button class="btn" onclick="alert('已设置为隐身')">隐身</button>
-        </div>
-        <button class="btn btn-secondary" onclick="switchSubPage('chat', 'list')">返回</button>
-      </div>
-    </div>
-
-    <!-- 聊天窗口（微信风格+按住说话） -->
-    <div id="chat-window" class="chat-window">
-      <!-- 渐变导航栏 -->
-      <div class="chat-window-header">
-        <div class="chat-back" onclick="closeChatWindow()">←</div>
-        <div id="chat-window-title">小李（骑手）</div>
-        <div class="chat-window-actions">
-          <button onclick="alert('已发起语音通话')">📞</button>
-          <button onclick="alert('已发起视频通话')">📹</button>
-        </div>
-      </div>
-      
-      <!-- 聊天消息区 -->
-      <div class="chat-messages" id="chat-messages">
+      <!-- 聊天窗口（核心功能） -->
+      <div id="chat-window" class="sub-page chat-content">
+        <!-- 聊天消息 -->
         <div class="msg-item msg-other">
           <img src="https://picsum.photos/40/40?random=1" class="msg-avatar">
           <div class="msg-bubble">您好，您的订单已取货！</div>
@@ -548,7 +510,21 @@
         <div class="msg-item msg-other">
           <img src="https://picsum.photos/40/40?random=1" class="msg-avatar">
           <div class="msg-bubble">
-            <img src="https://picsum.photos/100/100?random=1" class="msg-image" onclick="previewImage(this.src)">
+            <img src="https://picsum.photos/200/200?random=1" class="msg-media" onclick="previewMedia(this.src, 'image')">
+          </div>
+        </div>
+        <div class="msg-item msg-mine">
+          <div class="msg-bubble">
+            <div class="red-packet" onclick="openRedPacket()">
+              🧧 恭喜发财，大吉大利
+            </div>
+          </div>
+          <img src="https://picsum.photos/40/40?random=99" class="msg-avatar">
+        </div>
+        <div class="msg-item msg-other">
+          <img src="https://picsum.photos/40/40?random=1" class="msg-avatar">
+          <div class="msg-bubble">
+            <video src="https://www.w3school.com.cn/i/movie.mp4" class="msg-media" onclick="previewMedia('https://www.w3school.com.cn/i/movie.mp4', 'video')" poster="https://picsum.photos/200/200?random=2"></video>
           </div>
         </div>
         <div class="msg-item msg-mine">
@@ -556,412 +532,464 @@
           <img src="https://picsum.photos/40/40?random=99" class="msg-avatar">
         </div>
       </div>
-      
-      <!-- 语音面板（按住说话提示） -->
-      <div class="voice-panel" id="voicePanel">松开发送</div>
-      
-      <!-- 输入区域（支持文字/语音切换） -->
-      <div class="chat-input-area">
-        <div class="chat-input-switch">
-          <button id="voiceSwitchBtn" onclick="toggleVoiceInput()">🎙️</button>
-          <button onclick="chooseChatImage()">🖼️</button>
-          <button onclick="chooseChatFile()">📁</button>
-          <button onclick="openEmojiPanel()">😊</button>
+
+      <!-- 语音面板（长按说话） -->
+      <div class="voice-panel" id="voicePanel">
+        <div class="voice-panel__icon">🎙️</div>
+        <div id="voicePanelText">松开发送</div>
+      </div>
+
+      <!-- 图片/视频预览弹窗 -->
+      <div class="media-preview" id="mediaPreview">
+        <span class="media-preview-close" onclick="closeMediaPreview()">×</span>
+        <div class="media-preview-content" id="mediaPreviewContent"></div>
+      </div>
+
+      <!-- 增强版聊天编辑框（uv3__chattoolbar） -->
+      <div class="uv3__chattoolbar">
+        <div class="uv3__chattoolbar-editor">
+          <div class="btn" id="voiceBtn" onclick="toggleVoiceInput()">
+            <span id="voiceIcon">🎙️</span>
+          </div>
+          <div class="editor">
+            <!-- 文字输入框 -->
+            <textarea class="uv3-input" id="chatInput" placeholder="输入消息..." style="display:block;"></textarea>
+            <!-- 语音输入区域（默认隐藏） -->
+            <div class="uv3__voice-handle" id="voiceHandle" style="display:none;"
+                 onmousedown="startVoiceRecord()"
+                 onmouseup="stopVoiceRecord()"
+                 onmouseleave="cancelVoiceRecord()">
+              按住 说话
+            </div>
+          </div>
+          <div class="btn" onclick="toggleEmojiPanel()">😊</div>
+          <div class="btn" onclick="togglePlusPanel()">+</div>
+          <div class="btn" onclick="sendChatMsg()">↑</div>
         </div>
-        <!-- 文字输入框 -->
-        <input type="text" class="chat-input" placeholder="输入消息..." id="chat-input" style="display:block;">
-        <!-- 按住说话按钮（默认隐藏） -->
-        <div class="voice-btn" id="voiceBtn" style="display:none;" 
-             onmousedown="startVoiceRecord()" 
-             onmouseup="stopVoiceRecord()"
-             onmouseleave="cancelVoiceRecord()">
-          按住 说话
+
+        <!-- 表情/加号操作栏 -->
+        <div class="uv3__chattoolbar-operate" id="emojiPanel">
+          <div class="uv3__chattoolbar-emotion">
+            <div class="uv3__emotion-tabs">
+              <div class="item on" onclick="switchEmojiTab(0)">😀 表情</div>
+              <div class="item" onclick="switchEmojiTab(1)">🎭 动图</div>
+            </div>
+            <div class="uv3__emotion-cells active">
+              <span class="emoj" onclick="insertEmoji('😀')">😀</span>
+              <span class="emoj" onclick="insertEmoji('😂')">😂</span>
+              <span class="emoj" onclick="insertEmoji('🤣')">🤣</span>
+              <span class="emoj" onclick="insertEmoji('😍')">😍</span>
+              <span class="emoj" onclick="insertEmoji('😜')">😜</span>
+              <span class="emoj" onclick="insertEmoji('🤔')">🤔</span>
+              <span class="emoj" onclick="insertEmoji('🤗')">🤗</span>
+              <span class="emoj" onclick="insertEmoji('🤩')">🤩</span>
+              <span class="emoj" onclick="insertEmoji('🥳')">🥳</span>
+              <span class="emoj" onclick="insertEmoji('😎')">😎</span>
+              <span class="emoj" onclick="insertEmoji('🤪')">🤪</span>
+              <span class="emoj" onclick="insertEmoji('😝')">😝</span>
+            </div>
+          </div>
         </div>
-        <button class="chat-send-btn" id="sendBtn" onclick="sendChatMsg()">发送</button>
+
+        <div class="uv3__chattoolbar-operate" id="plusPanel">
+          <div class="uv3__chattoolbar-pluschoose">
+            <div class="uv3__plusbtns-cells" onclick="chooseImage()">
+              <div class="icon">🖼️</div>
+              <div class="label">图片</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="chooseVideo()">
+              <div class="icon">🎬</div>
+              <div class="label">视频</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="openRedPacket()">
+              <div class="icon">🧧</div>
+              <div class="label">红包</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="chooseFile()">
+              <div class="icon">📁</div>
+              <div class="label">文件</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="switchSubPage('chat', 'moments')">
+              <div class="icon">📝</div>
+              <div class="label">朋友圈</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="alert('已发起语音通话')">
+              <div class="icon">📞</div>
+              <div class="label">语音通话</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="alert('已发起视频通话')">
+              <div class="icon">📹</div>
+              <div class="label">视频通话</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="alert('已选择位置')">
+              <div class="icon">📍</div>
+              <div class="label">位置</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="alert('已发送名片')">
+              <div class="icon">👤</div>
+              <div class="label">名片</div>
+            </div>
+            <div class="uv3__plusbtns-cells" onclick="alert('已发起转账')">
+              <div class="icon">💴</div>
+              <div class="label">转账</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- 3. 跑腿服务（用户/骑手/管理员） -->
-  <div id="page-service" class="page">
-    <div class="page-title">跑腿服务</div>
-    <!-- 跑腿服务子页面：用户端 -->
-    <div id="service-user" class="sub-page active">
+    <!-- 3. 跑腿服务（保持不变） -->
+    <div id="page-service" class="page">
+      <div class="page-title">跑腿服务</div>
+      <div id="service-user" class="sub-page active">
+        <div class="content">
+          <button class="btn" onclick="switchSubPage('service', 'publish')">发布订单</button>
+          <button class="btn" onclick="switchSubPage('service', 'order-manage')">订单管理</button>
+          <button class="btn" onclick="switchSubPage('service', 'address')">地址管理</button>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">切换到骑手端</button>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">切换到管理员端</button>
+          <div class="item">
+            <h3>热门服务</h3>
+            <p>📦 快递代取 | 🍱 外卖配送 | 💌 表白墙 | 🛒 二手交易</p>
+          </div>
+        </div>
+      </div>
+      <div id="service-publish" class="sub-page">
+        <div class="sub-title">发布订单</div>
+        <div class="content">
+          <div class="form-item">
+            <label>服务类型</label>
+            <select>
+              <option>快递代取</option>
+              <option>外卖配送</option>
+              <option>表白墙</option>
+              <option>二手交易</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>取货地址</label>
+            <input type="text" placeholder="请输入取货地址">
+          </div>
+          <div class="form-item">
+            <label>送达地址</label>
+            <input type="text" placeholder="请输入送达地址">
+          </div>
+          <div class="form-item">
+            <label>服务费用（元）</label>
+            <input type="number" placeholder="请输入费用" min="0">
+          </div>
+          <button class="btn" onclick="alert('订单发布成功！')">发布订单</button>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
+        </div>
+      </div>
+      <div id="service-order-manage" class="sub-page">
+        <div class="sub-title">订单管理</div>
+        <div class="content">
+          <div class="item">
+            <h3>待接单</h3>
+            <p>订单号：123456 | 服务类型：快递代取 | <span class="price">¥10.00</span></p>
+            <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
+          </div>
+          <div class="item">
+            <h3>已完成</h3>
+            <p>订单号：654321 | 服务类型：外卖配送 | <span class="price">¥8.00</span></p>
+            <button class="btn" onclick="alert('已跳转到评价页面')">评价骑手</button>
+            <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
+          </div>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
+        </div>
+      </div>
+      <div id="service-address" class="sub-page">
+        <div class="sub-title">地址管理</div>
+        <div class="content">
+          <div class="item">
+            <h3>常用收货地址</h3>
+            <p>学生宿舍 3 栋 502</p>
+            <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
+            <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
+          </div>
+          <div class="item">
+            <h3>常用发货地址</h3>
+            <p>图书馆 2 楼自习室</p>
+            <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
+            <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
+          </div>
+          <button class="btn" onclick="alert('已跳转到添加地址页面')">添加新地址</button>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
+        </div>
+      </div>
+      <div id="service-rider" class="sub-page">
+        <div class="sub-title">骑手端</div>
+        <div class="content">
+          <button class="btn" onclick="alert('已跳转到实名认证页面')">骑手认证</button>
+          <button class="btn" onclick="switchSubPage('service', 'rider-order')">接单管理</button>
+          <button class="btn" onclick="switchSubPage('service', 'rider-income')">收入管理</button>
+          <button class="btn" onclick="switchSubPage('service', 'rider-rank')">接单排行榜</button>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
+        </div>
+      </div>
+      <div id="service-rider-order" class="sub-page">
+        <div class="sub-title">接单管理</div>
+        <div class="content">
+          <div class="item">
+            <h3>可接订单</h3>
+            <p>订单号：123456 | 取货：宿舍 3 栋 | 送达：图书馆 | <span class="price">¥10.00</span></p>
+            <button class="btn" onclick="alert('已接单！')">接单</button>
+          </div>
+          <div class="item">
+            <h3>待配送</h3>
+            <p>订单号：654321 | 取货：食堂 | 送达：教学楼 | <span class="price">¥8.00</span></p>
+            <button class="btn" onclick="alert('已更新订单状态为：配送中')">更新状态</button>
+          </div>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
+        </div>
+      </div>
+      <div id="service-rider-income" class="sub-page">
+        <div class="sub-title">收入管理</div>
+        <div class="content">
+          <div class="item">
+            <h3>本月收入</h3>
+            <p><span class="price">¥1280.00</span></p>
+            <button class="btn" onclick="alert('已查看收入明细')">明细</button>
+            <button class="btn" onclick="alert('已申请提现，预计1-3个工作日到账')">申请提现</button>
+          </div>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
+        </div>
+      </div>
+      <div id="service-rider-rank" class="sub-page">
+        <div class="sub-title">接单排行榜</div>
+        <div class="content">
+          <div class="item">
+            <p>🥇 小李：本月接单 120 单</p>
+            <p>🥈 小张：本月接单 105 单</p>
+            <p>🥉 小王：本月接单 98 单</p>
+            <p>🏅 您的排名：第 5 名（88 单）</p>
+          </div>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
+        </div>
+      </div>
+      <div id="service-admin" class="sub-page">
+        <div class="sub-title">管理员端</div>
+        <div class="content">
+          <button class="btn" onclick="switchSubPage('service', 'admin-data')">数据统计</button>
+          <button class="btn" onclick="switchSubPage('service', 'admin-user')">用户管理</button>
+          <button class="btn" onclick="switchSubPage('service', 'admin-rider-audit')">骑手认证审核</button>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
+        </div>
+      </div>
+      <div id="service-admin-data" class="sub-page">
+        <div class="sub-title">数据统计</div>
+        <div class="content">
+          <div class="item">
+            <p>总用户数：1258 人</p>
+            <p>总订单数：3680 单</p>
+            <p>总交易金额：<span class="price">¥45680.00</span></p>
+          </div>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+        </div>
+      </div>
+      <div id="service-admin-user" class="sub-page">
+        <div class="sub-title">用户管理</div>
+        <div class="content">
+          <div class="item">
+            <p>用户名：孙山果 | 手机号：138****1234 | 状态：正常</p>
+            <button class="btn btn-secondary" onclick="alert('已禁用该用户')">禁用</button>
+          </div>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+        </div>
+      </div>
+      <div id="service-admin-rider-audit" class="sub-page">
+        <div class="sub-title">骑手认证审核</div>
+        <div class="content">
+          <div class="item">
+            <p>申请人：小李 | 身份证：110****1999</p>
+            <button class="btn" onclick="alert('已通过认证审核')">通过</button>
+            <button class="btn btn-secondary" onclick="alert('已拒绝认证审核')">拒绝</button>
+          </div>
+          <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 论坛（待开发） -->
+    <div id="page-forum" class="page">
+      <div class="page-title">校园论坛</div>
       <div class="content">
-        <button class="btn" onclick="switchSubPage('service', 'publish')">发布订单</button>
-        <button class="btn" onclick="switchSubPage('service', 'order-manage')">订单管理</button>
-        <button class="btn" onclick="switchSubPage('service', 'address')">地址管理</button>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">切换到骑手端</button>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">切换到管理员端</button>
-
-        <div class="item">
-          <h3>热门服务</h3>
-          <p>📦 快递代取 | 🍱 外卖配送 | 💌 表白墙 | 🛒 二手交易</p>
+        <div class="item" style="text-align:center;padding:50px">
+          <h3>论坛功能待开发...</h3>
+          <p>敬请期待！</p>
         </div>
       </div>
     </div>
 
-    <!-- 跑腿服务子页面：发布订单 -->
-    <div id="service-publish" class="sub-page">
-      <div class="sub-title">发布订单</div>
-      <div class="content">
-        <div class="form-item">
-          <label>服务类型</label>
-          <select>
-            <option>快递代取</option>
-            <option>外卖配送</option>
-            <option>表白墙</option>
-            <option>二手交易</option>
-          </select>
+    <!-- 5. 我的（个人中心） -->
+    <div id="page-user" class="page">
+      <div class="page-title">个人中心</div>
+      <div id="user-info" class="sub-page active">
+        <div class="content">
+          <div class="item">
+            <p>用户名：孙山果</p>
+            <p>手机号：138****1234</p>
+            <p>账户余额：<span class="price">¥25.00</span></p>
+          </div>
+          <button class="btn" onclick="switchSubPage('user', 'edit-info')">编辑个人信息</button>
+          <button class="btn" onclick="switchSubPage('user', 'payment')">支付系统</button>
+          <button class="btn" onclick="alert('已退出登录，返回首页')">退出登录</button>
         </div>
-        <div class="form-item">
-          <label>取货地址</label>
-          <input type="text" placeholder="请输入取货地址">
+      </div>
+      <div id="user-edit-info" class="sub-page">
+        <div class="sub-title">编辑个人信息</div>
+        <div class="content">
+          <div class="form-item">
+            <label>用户名</label>
+            <input type="text" value="孙山果">
+          </div>
+          <div class="form-item">
+            <label>头像</label>
+            <input type="file" accept="image/*">
+          </div>
+          <button class="btn" onclick="alert('信息修改成功！')">保存</button>
+          <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
         </div>
-        <div class="form-item">
-          <label>送达地址</label>
-          <input type="text" placeholder="请输入送达地址">
+      </div>
+      <div id="user-payment" class="sub-page">
+        <div class="sub-title">支付系统</div>
+        <div class="content">
+          <div class="item">
+            <h3>充值余额</h3>
+            <input type="number" placeholder="请输入充值金额" min="1">
+            <button class="btn" onclick="alert('充值成功！')">立即充值</button>
+          </div>
+          <div class="item">
+            <h3>支付方式</h3>
+            <p>微信支付 ✅</p>
+            <p>支付宝支付 ✅</p>
+          </div>
+          <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
         </div>
-        <div class="form-item">
-          <label>服务费用（元）</label>
-          <input type="number" placeholder="请输入费用" min="0">
-        </div>
-        <button class="btn" onclick="alert('订单发布成功！')">发布订单</button>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
       </div>
     </div>
 
-    <!-- 跑腿服务子页面：订单管理 -->
-    <div id="service-order-manage" class="sub-page">
-      <div class="sub-title">订单管理</div>
-      <div class="content">
-        <div class="item">
-          <h3>待接单</h3>
-          <p>订单号：123456 | 服务类型：快递代取 | <span class="price">¥10.00</span></p>
-          <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
-        </div>
-        <div class="item">
-          <h3>已完成</h3>
-          <p>订单号：654321 | 服务类型：外卖配送 | <span class="price">¥8.00</span></p>
-          <button class="btn" onclick="alert('已跳转到评价页面')">评价骑手</button>
-          <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
-        </div>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
+    <!-- 自定义底部TabBar（uv3-tabbar） -->
+    <div class="uv3-tabbar">
+      <div class="uv3-tabbar__item active" onclick="switchPage('home')">
+        <div>🏠</div>
+        <div>首页</div>
       </div>
-    </div>
-
-    <!-- 跑腿服务子页面：地址管理 -->
-    <div id="service-address" class="sub-page">
-      <div class="sub-title">地址管理</div>
-      <div class="content">
-        <div class="item">
-          <h3>常用收货地址</h3>
-          <p>学生宿舍 3 栋 502</p>
-          <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
-          <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
-        </div>
-        <div class="item">
-          <h3>常用发货地址</h3>
-          <p>图书馆 2 楼自习室</p>
-          <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
-          <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
-        </div>
-        <button class="btn" onclick="alert('已跳转到添加地址页面')">添加新地址</button>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
+      <div class="uv3-tabbar__item" onclick="switchPage('chat')">
+        <div>💬</div>
+        <div>聊天</div>
       </div>
-    </div>
-
-    <!-- 跑腿服务子页面：骑手端 -->
-    <div id="service-rider" class="sub-page">
-      <div class="sub-title">骑手端</div>
-      <div class="content">
-        <button class="btn" onclick="alert('已跳转到实名认证页面')">骑手认证</button>
-        <button class="btn" onclick="switchSubPage('service', 'rider-order')">接单管理</button>
-        <button class="btn" onclick="switchSubPage('service', 'rider-income')">收入管理</button>
-        <button class="btn" onclick="switchSubPage('service', 'rider-rank')">接单排行榜</button>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
+      <div class="uv3-tabbar__item" onclick="switchPage('service')">
+        <div>🚴</div>
+        <div>跑腿服务</div>
       </div>
-    </div>
-
-    <!-- 骑手端子页面：接单管理 -->
-    <div id="service-rider-order" class="sub-page">
-      <div class="sub-title">接单管理</div>
-      <div class="content">
-        <div class="item">
-          <h3>可接订单</h3>
-          <p>订单号：123456 | 取货：宿舍 3 栋 | 送达：图书馆 | <span class="price">¥10.00</span></p>
-          <button class="btn" onclick="alert('已接单！')">接单</button>
-        </div>
-        <div class="item">
-          <h3>待配送</h3>
-          <p>订单号：654321 | 取货：食堂 | 送达：教学楼 | <span class="price">¥8.00</span></p>
-          <button class="btn" onclick="alert('已更新订单状态为：配送中')">更新状态</button>
-        </div>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
+      <div class="uv3-tabbar__item" onclick="switchPage('forum')">
+        <div>📢</div>
+        <div>论坛</div>
       </div>
-    </div>
-
-    <!-- 骑手端子页面：收入管理 -->
-    <div id="service-rider-income" class="sub-page">
-      <div class="sub-title">收入管理</div>
-      <div class="content">
-        <div class="item">
-          <h3>本月收入</h3>
-          <p><span class="price">¥1280.00</span></p>
-          <button class="btn" onclick="alert('已查看收入明细')">明细</button>
-          <button class="btn" onclick="alert('已申请提现，预计1-3个工作日到账')">申请提现</button>
-        </div>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
+      <div class="uv3-tabbar__item" onclick="switchPage('user')">
+        <div>👤</div>
+        <div>我的</div>
       </div>
-    </div>
-
-    <!-- 骑手端子页面：接单排行榜 -->
-    <div id="service-rider-rank" class="sub-page">
-      <div class="sub-title">接单排行榜</div>
-      <div class="content">
-        <div class="item">
-          <p>🥇 小李：本月接单 120 单</p>
-          <p>🥈 小张：本月接单 105 单</p>
-          <p>🥉 小王：本月接单 98 单</p>
-          <p>🏅 您的排名：第 5 名（88 单）</p>
-        </div>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
-      </div>
-    </div>
-
-    <!-- 跑腿服务子页面：管理员端 -->
-    <div id="service-admin" class="sub-page">
-      <div class="sub-title">管理员端</div>
-      <div class="content">
-        <button class="btn" onclick="switchSubPage('service', 'admin-data')">数据统计</button>
-        <button class="btn" onclick="switchSubPage('service', 'admin-user')">用户管理</button>
-        <button class="btn" onclick="switchSubPage('service', 'admin-rider-audit')">骑手认证审核</button>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
-      </div>
-    </div>
-
-    <!-- 管理员端子页面：数据统计 -->
-    <div id="service-admin-data" class="sub-page">
-      <div class="sub-title">数据统计</div>
-      <div class="content">
-        <div class="item">
-          <p>总用户数：1258 人</p>
-          <p>总订单数：3680 单</p>
-          <p>总交易金额：<span class="price">¥45680.00</span></p>
-        </div>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
-      </div>
-    </div>
-
-    <!-- 管理员端子页面：用户管理 -->
-    <div id="service-admin-user" class="sub-page">
-      <div class="sub-title">用户管理</div>
-      <div class="content">
-        <div class="item">
-          <p>用户名：孙山果 | 手机号：138****1234 | 状态：正常</p>
-          <button class="btn btn-secondary" onclick="alert('已禁用该用户')">禁用</button>
-        </div>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
-      </div>
-    </div>
-
-    <!-- 管理员端子页面：骑手认证审核 -->
-    <div id="service-admin-rider-audit" class="sub-page">
-      <div class="sub-title">骑手认证审核</div>
-      <div class="content">
-        <div class="item">
-          <p>申请人：小李 | 身份证：110****1999</p>
-          <button class="btn" onclick="alert('已通过认证审核')">通过</button>
-          <button class="btn btn-secondary" onclick="alert('已拒绝认证审核')">拒绝</button>
-        </div>
-        <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. 论坛（待开发） -->
-  <div id="page-forum" class="page">
-    <div class="page-title">校园论坛</div>
-    <div class="content">
-      <div class="item" style="text-align:center;padding:50px">
-        <h3>论坛功能待开发...</h3>
-        <p>敬请期待！</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 5. 我的（个人中心） -->
-  <div id="page-user" class="page">
-    <div class="page-title">个人中心</div>
-    <!-- 我的子页面：个人信息 -->
-    <div id="user-info" class="sub-page active">
-      <div class="content">
-        <div class="item">
-          <p>用户名：孙山果</p>
-          <p>手机号：138****1234</p>
-          <p>账户余额：<span class="price">¥25.00</span></p>
-        </div>
-        <button class="btn" onclick="switchSubPage('user', 'edit-info')">编辑个人信息</button>
-        <button class="btn" onclick="switchSubPage('user', 'payment')">支付系统</button>
-        <button class="btn" onclick="alert('已退出登录，返回首页')">退出登录</button>
-      </div>
-    </div>
-
-    <!-- 我的子页面：编辑个人信息 -->
-    <div id="user-edit-info" class="sub-page">
-      <div class="sub-title">编辑个人信息</div>
-      <div class="content">
-        <div class="form-item">
-          <label>用户名</label>
-          <input type="text" value="孙山果">
-        </div>
-        <div class="form-item">
-          <label>头像</label>
-          <input type="file" accept="image/*">
-        </div>
-        <button class="btn" onclick="alert('信息修改成功！')">保存</button>
-        <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
-      </div>
-    </div>
-
-    <!-- 我的子页面：支付系统 -->
-    <div id="user-payment" class="sub-page">
-      <div class="sub-title">支付系统</div>
-      <div class="content">
-        <div class="item">
-          <h3>充值余额</h3>
-          <input type="number" placeholder="请输入充值金额" min="1">
-          <button class="btn" onclick="alert('充值成功！')">立即充值</button>
-        </div>
-        <div class="item">
-          <h3>支付方式</h3>
-          <p>微信支付 ✅</p>
-          <p>支付宝支付 ✅</p>
-        </div>
-        <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 底部 Tab 导航 -->
-  <div class="tab-bar">
-    <div class="tab-item active" onclick="switchPage('home')">
-      <div>🏠</div>
-      <div>首页</div>
-    </div>
-    <div class="tab-item" onclick="switchPage('chat')">
-      <div>💬</div>
-      <div>聊天</div>
-    </div>
-    <div class="tab-item" onclick="switchPage('service')">
-      <div>🚴</div>
-      <div>跑腿服务</div>
-    </div>
-    <div class="tab-item" onclick="switchPage('forum')">
-      <div>📢</div>
-      <div>论坛</div>
-    </div>
-    <div class="tab-item" onclick="switchPage('user')">
-      <div>👤</div>
-      <div>我的</div>
     </div>
   </div>
 
   <script>
     // 全局变量
-    let voiceInputEnabled = false; // 是否启用语音输入
+    let voiceInputEnabled = false;
     let voiceType = 1; // 1:松开发送 2:左滑取消 3:右滑转文字
-
-    // 切换主页面（Tab 切换）
+    
+    // 切换主页面
     function switchPage(pageName) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById('page-' + pageName).classList.add('active');
-      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.uv3-tabbar__item').forEach(t => t.classList.remove('active'));
       const tabs = ['home', 'chat', 'service', 'forum', 'user'];
-      document.querySelectorAll('.tab-item')[tabs.indexOf(pageName)].classList.add('active');
-      closeChatWindow();
-      closePopupMenu();
+      document.querySelectorAll('.uv3-tabbar__item')[tabs.indexOf(pageName)].classList.add('active');
+      
+      // 聊天页面默认显示聊天列表
+      if (pageName === 'chat') {
+        switchSubPage('chat', 'list');
+      }
+      
+      // 关闭所有面板
+      closeAllPanels();
     }
 
     // 切换子页面
     function switchSubPage(mainPage, subPage) {
       document.querySelectorAll(`#page-${mainPage} .sub-page`).forEach(s => s.classList.remove('active'));
       document.getElementById(`${mainPage}-${subPage}`).classList.add('active');
-      closePopupMenu();
+      closeAllPanels();
     }
 
-    // ========== 聊天模块新增功能 ==========
-    // 下拉菜单控制
-    function togglePopupMenu() {
-      const menu = document.getElementById('popupMenu');
-      menu.classList.toggle('active');
+    // 关闭所有操作面板
+    function closeAllPanels() {
+      document.getElementById('emojiPanel').classList.remove('active');
+      document.getElementById('plusPanel').classList.remove('active');
+      document.getElementById('voicePanel').classList.remove('active');
     }
 
-    function closePopupMenu() {
-      document.getElementById('popupMenu').classList.remove('active');
+    // ========== 微信风格聊天核心功能 ==========
+    // 打开聊天窗口
+    function openChatWindow(title) {
+      switchSubPage('chat', 'window');
+      document.querySelector('.uv3-navbar__title').textContent = title;
+      // 滚动到消息底部
+      const chatWindow = document.getElementById('chat-window');
+      chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
-    function handlePopupMenu(index) {
-      switch(index) {
-        case 0: alert('发起群聊'); break;
-        case 1: switchSubPage('chat', 'add-friend'); break;
-        case 2: alert('扫一扫'); break;
-        case 3: alert('收付款'); break;
-      }
-      closePopupMenu();
-    }
-
-    // 朋友圈图片选择
-    function chooseImage() {
-      alert('选择手机相册图片');
-    }
-
-    // 图片预览
-    function previewImage(src) {
-      alert(`预览图片：${src}\n（可左右滑动查看更多）`);
-    }
-
-    // 语音输入切换
+    // 切换语音/文字输入
     function toggleVoiceInput() {
       voiceInputEnabled = !voiceInputEnabled;
-      const textInput = document.getElementById('chat-input');
-      const voiceBtn = document.getElementById('voiceBtn');
-      const sendBtn = document.getElementById('sendBtn');
-      const voiceSwitchBtn = document.getElementById('voiceSwitchBtn');
+      const chatInput = document.getElementById('chatInput');
+      const voiceHandle = document.getElementById('voiceHandle');
+      const voiceIcon = document.getElementById('voiceIcon');
       
       if (voiceInputEnabled) {
-        textInput.style.display = 'none';
-        voiceBtn.style.display = 'flex';
-        sendBtn.style.display = 'none';
-        voiceSwitchBtn.textContent = '✏️';
+        chatInput.style.display = 'none';
+        voiceHandle.style.display = 'flex';
+        voiceIcon.textContent = '✏️';
       } else {
-        textInput.style.display = 'block';
-        voiceBtn.style.display = 'none';
-        sendBtn.style.display = 'block';
-        voiceSwitchBtn.textContent = '🎙️';
+        chatInput.style.display = 'block';
+        voiceHandle.style.display = 'none';
+        voiceIcon.textContent = '🎙️';
       }
+      closeAllPanels();
     }
 
-    // 按住说话 - 开始录音
-    function startVoiceRecord() {
+    // 长按说话 - 开始录音
+    function startVoiceRecord(e) {
       const voicePanel = document.getElementById('voicePanel');
-      voicePanel.textContent = '松开发送';
+      const voicePanelText = document.getElementById('voicePanelText');
+      voicePanelText.textContent = '松开发送';
       voicePanel.classList.add('active');
       voiceType = 1;
-      // 模拟滑动检测（简化版）
+      
+      // 监听鼠标移动（模拟滑动）
       document.addEventListener('mousemove', detectVoiceSwipe);
     }
 
-    // 按住说话 - 停止录音
+    // 长按说话 - 停止录音
     function stopVoiceRecord() {
       document.removeEventListener('mousemove', detectVoiceSwipe);
       const voicePanel = document.getElementById('voicePanel');
       voicePanel.classList.remove('active');
       
       switch(voiceType) {
-        case 1: alert('发送录音文件'); break;
-        case 2: alert('取消发送'); break;
-        case 3: alert('语音转文字：已收到，谢谢！'); sendChatMsg('已收到，谢谢！'); break;
+        case 1: 
+          alert('发送录音文件');
+          sendChatMsg('[语音消息]');
+          break;
+        case 2: 
+          alert('取消发送');
+          break;
+        case 3: 
+          alert('语音转文字：已收到，谢谢！');
+          sendChatMsg('已收到，谢谢！');
+          break;
       }
       voiceType = 1;
     }
@@ -969,90 +997,83 @@
     // 取消录音
     function cancelVoiceRecord() {
       stopVoiceRecord();
-      if (voiceType === 1) {
-        voiceType = 2;
-      }
+      voiceType = 2;
     }
 
-    // 语音滑动检测（简化版）
+    // 语音滑动检测
     function detectVoiceSwipe(e) {
-      const voicePanel = document.getElementById('voicePanel');
+      const voicePanelText = document.getElementById('voicePanelText');
       const y = e.clientY;
       const x = e.clientX;
       const windowHeight = window.innerHeight;
       const windowWidth = window.innerWidth;
       
-      // 模拟滑动逻辑
-      if (y < windowHeight - 150) {
+      if (y < windowHeight - 200) {
         if (x < windowWidth / 2) {
           voiceType = 2;
-          voicePanel.textContent = '左滑松开取消';
+          voicePanelText.textContent = '左滑松开取消';
         } else {
           voiceType = 3;
-          voicePanel.textContent = '右滑语音转文字';
+          voicePanelText.textContent = '右滑语音转文字';
         }
       } else {
         voiceType = 1;
-        voicePanel.textContent = '松开发送';
+        voicePanelText.textContent = '松开发送';
       }
     }
 
-    // 选择聊天图片
-    function chooseChatImage() {
-      alert('已选择聊天图片');
-      // 模拟发送图片消息
-      const messages = document.getElementById('chat-messages');
-      const msgItem = document.createElement('div');
-      msgItem.className = 'msg-item msg-mine';
-      msgItem.innerHTML = `
-        <div class="msg-bubble">
-          <img src="https://picsum.photos/100/100?random=${Math.random()}" class="msg-image" onclick="previewImage(this.src)">
-        </div>
-        <img src="https://picsum.photos/40/40?random=99" class="msg-avatar">
-      `;
-      messages.appendChild(msgItem);
-      messages.scrollTop = messages.scrollHeight;
+    // 切换表情面板
+    function toggleEmojiPanel() {
+      const emojiPanel = document.getElementById('emojiPanel');
+      const plusPanel = document.getElementById('plusPanel');
+      
+      emojiPanel.classList.toggle('active');
+      plusPanel.classList.remove('active');
     }
 
-    // 选择聊天文件
-    function chooseChatFile() {
-      alert('已选择聊天文件');
+    // 切换加号面板
+    function togglePlusPanel() {
+      const plusPanel = document.getElementById('plusPanel');
+      const emojiPanel = document.getElementById('emojiPanel');
+      
+      plusPanel.classList.toggle('active');
+      emojiPanel.classList.remove('active');
     }
 
-    // 打开表情包面板
-    function openEmojiPanel() {
-      alert('已打开表情包面板 😜😂🤣');
+    // 切换表情标签页
+    function switchEmojiTab(index) {
+      document.querySelectorAll('.uv3__emotion-tabs .item').forEach((item, i) => {
+        item.classList.toggle('on', i === index);
+      });
+      // 模拟动图标签页（实际项目中可替换为真实动图）
+      if (index === 1) {
+        alert('已切换到动图面板');
+      }
     }
 
-    // 打开聊天窗口
-    function openChatWindow(title) {
-      document.getElementById('chat-window-title').innerText = title;
-      document.getElementById('chat-window').classList.add('active');
-      // 重置语音输入状态
-      voiceInputEnabled = false;
-      toggleVoiceInput();
-    }
-
-    // 关闭聊天窗口
-    function closeChatWindow() {
-      document.getElementById('chat-window').classList.remove('active');
+    // 插入表情
+    function insertEmoji(emoji) {
+      const chatInput = document.getElementById('chatInput');
+      chatInput.value += emoji;
+      chatInput.focus();
     }
 
     // 发送聊天消息
-    function sendChatMsg(voiceText) {
-      const input = document.getElementById('chat-input');
-      const msg = voiceText || input.value.trim();
+    function sendChatMsg(customMsg) {
+      const chatInput = document.getElementById('chatInput');
+      const msg = customMsg || chatInput.value.trim();
+      
       if (msg) {
-        const messages = document.getElementById('chat-messages');
+        const chatWindow = document.getElementById('chat-window');
         const msgItem = document.createElement('div');
         msgItem.className = 'msg-item msg-mine';
         msgItem.innerHTML = `
           <div class="msg-bubble">${msg}</div>
           <img src="https://picsum.photos/40/40?random=99" class="msg-avatar">
         `;
-        messages.appendChild(msgItem);
-        input.value = '';
-        messages.scrollTop = messages.scrollHeight;
+        chatWindow.appendChild(msgItem);
+        chatInput.value = '';
+        chatWindow.scrollTop = chatWindow.scrollHeight;
         
         // 模拟对方回复
         setTimeout(() => {
@@ -1062,19 +1083,64 @@
             <img src="https://picsum.photos/40/40?random=1" class="msg-avatar">
             <div class="msg-bubble">收到啦！</div>
           `;
-          messages.appendChild(replyItem);
-          messages.scrollTop = messages.scrollHeight;
+          chatWindow.appendChild(replyItem);
+          chatWindow.scrollTop = chatWindow.scrollHeight;
         }, 1000);
       }
+      closeAllPanels();
     }
 
-    // 点击空白处关闭下拉菜单
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.popup-menu')) {
-        closePopupMenu();
+    // 图片/视频预览
+    function previewMedia(src, type) {
+      const preview = document.getElementById('mediaPreview');
+      const previewContent = document.getElementById('mediaPreviewContent');
+      
+      if (type === 'image') {
+        previewContent.innerHTML = `<img src="${src}" style="max-width:90%;max-height:90%;">`;
+      } else if (type === 'video') {
+        previewContent.innerHTML = `<video src="${src}" controls style="max-width:90%;max-height:90%;"></video>`;
       }
-    });
+      
+      preview.classList.add('active');
+    }
+
+    // 关闭媒体预览
+    function closeMediaPreview() {
+      document.getElementById('mediaPreview').classList.remove('active');
+    }
+
+    // 打开红包
+    function openRedPacket() {
+      alert('🧧 恭喜发财，大吉大利！\n您收到了一个微信红包，金额：¥8.88');
+    }
+
+    // 选择图片
+    function chooseImage() {
+      alert('已选择相册图片，即将发送！');
+      sendChatMsg('<img src="https://picsum.photos/200/200?random='+Math.random()+'" class="msg-media">');
+      closeAllPanels();
+    }
+
+    // 选择视频
+    function chooseVideo() {
+      alert('已选择视频，即将发送！');
+      sendChatMsg('<video src="https://www.w3school.com.cn/i/movie.mp4" class="msg-media" poster="https://picsum.photos/200/200?random='+Math.random()+'"></video>');
+      closeAllPanels();
+    }
+
+    // 选择文件
+    function chooseFile() {
+      alert('已选择文件，即将发送！');
+      sendChatMsg('[文件：文档.pdf]');
+      closeAllPanels();
+    }
+
+    // 初始化：隐藏系统TabBar（模拟UniApp的hideTabBar）
+    window.onload = function() {
+      // PC端固定750px宽度
+      document.body.style.overflow = 'hidden';
+      console.log('App Launch - 隐藏系统TabBar');
+    };
   </script>
 </body>
 </html>
-EOF
