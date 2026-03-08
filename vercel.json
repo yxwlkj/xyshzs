@@ -1,7 +1,4 @@
 {
-  "build": {
-    "outputDirectory": "camp_lassistant-app/unpackage/dist/build/h5"
-  },
   "routes": [
     { "src": "/(.*)", "dest": "/index.html" }
   ]
