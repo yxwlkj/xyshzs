@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: |
+          cd camp_lassistant-app
+          npm ci
+      - name: Run lint (if any)
+        run: |
+          # placeholder for linting
+          echo "lint step"
+      - name: Run tests
+        run: |
+          # no tests yet
+          echo "no tests to run"      - name: Deploy static site to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./app
+          working_directory: camp_lassistant-app

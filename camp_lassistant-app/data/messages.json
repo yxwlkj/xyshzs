@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "chatId": "general",
+    "type": "group",
+    "sender": "alice",
+    "text": "Hello, campus!",
+    "attachments": [],      // [{type:'image',url:'...',name:'file.jpg'}]
+    "readBy": ["alice"],   // usernames who have read
+    "timestamp": "2026-03-08T12:00:00Z"
+  }
+]

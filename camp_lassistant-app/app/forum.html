@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forum</title>
+  <link rel="stylesheet" href="/App.css">
+  <link rel="stylesheet" href="/forum/Forum.css">
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="index.html">首页</a>
+      <a href="chat.html">聊天</a>
+      <a href="order.html">订单</a>
+      <a href="runner.html">跑腿</a>
+      <a href="forum.html">论坛</a>
+    </nav>
+    <h2>论坛</h2>
+    <div id="status" style="min-height:1em;"></div>
+    <div id="posts"></div>
+    <form id="postForm">
+      <input name="author" placeholder="发布者" required>
+      <textarea name="content" placeholder="内容" required></textarea>
+      <button type="submit">发布</button>
+    </form>
+  </div>
+  <script>
+    function showStatus(msg,isError=false){const s=document.getElementById('status');s.textContent=msg;s.style.color=isError?'red':'green';setTimeout(()=>{s.textContent='';},3000);}    
+    async function load() {
+      const res = await fetch('/api/posts');
+      const posts = await res.json();
+      const div = document.getElementById('posts');
+      if (posts.length === 0) {
+        div.innerHTML = '<p><em>暂无帖子。</em></p>';
+      } else {
+        div.innerHTML = posts.map(p=>{
+          const comments = (p.comments||[]).map((c,i)=>`<div class=\"reply\"><em>${c.author}</em>: ${c.content} <button class=\"del-comment\" data-post=\"${p.postId}\" data-idx=\"${i}\">×</button></div>`).join('');
+          return `<div class=\"post\"><p><strong>${p.author}</strong>: ${p.content} <button class=\"del-post\" data-id=\"${p.postId}\">×</button></p>${comments}<form class=\"commentForm\" data-id=\"${p.postId}\"><input name=\"author\" placeholder=\"评论者\" required><input name=\"content\" placeholder=\"回复\" required><button>回复</button></form></div>`;
+        }).join('');
+      }
+      document.querySelectorAll('.commentForm').forEach(form=>{
+        form.addEventListener('submit', async e=>{
+          e.preventDefault();
+          const id = form.dataset.id;
+          const data = { author: form.author.value, content: form.content.value };
+          await fetch('/api/posts/'+id+'/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+          load();
+        });
+      });
+      // delete handlers
+      document.querySelectorAll('.del-post').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const id = btn.dataset.id;
+          await fetch('/api/posts/'+id, {method:'DELETE'});
+          showStatus('帖子已删除');
+          load();
+        });
+      });
+      document.querySelectorAll('.del-comment').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const postId = btn.dataset.post;
+          const idx = btn.dataset.idx;
+          await fetch(`/api/posts/${postId}/comments/${idx}`, {method:'DELETE'});
+          showStatus('评论已删除');
+          load();
+        });
+      });
+    }
+    document.getElementById('postForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const form = e.target;
+      localStorage.setItem('forumAuthor', form.author.value);
+      const data = { author: form.author.value, content: form.content.value };
+      await fetch('/api/posts', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+      form.reset();
+      load();
+      showStatus('帖子已发布');
+    });
+    // restore author
+    document.getElementById('postForm').author.value = localStorage.getItem('forumAuthor') || '';    // refresh posts occasionally
+    setInterval(load, 10000);
+    load();
+    document.querySelectorAll('nav a').forEach(a=>{
+      if (a.getAttribute('href') === 'forum.html') a.style.fontWeight = 'bold';
+    });
+  </script>
+</body>
+</html>

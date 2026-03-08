@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Assistant</title>
+  <link rel="stylesheet" href="/App.css">
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="index.html">首页</a>
+      <a href="chat.html">聊天</a>
+      <a href="order.html">订单</a>
+      <a href="runner.html">跑腿</a>
+      <a href="forum.html">论坛</a>
+    </nav>
+    <h1>校园生活助手 演示</h1>
+    <p>请选择一个功能体验：</p>
+  </div>
+<script>
+  document.querySelectorAll('nav a').forEach(a=>{
+    if (a.getAttribute('href') === window.location.pathname.split('/').pop()) {
+      a.style.fontWeight = 'bold';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "name": "camp_lassistant-app",
+  "components": ["app", "chat", "order", "forum"],
+  "description": "校园生活助手 application repository"
+}

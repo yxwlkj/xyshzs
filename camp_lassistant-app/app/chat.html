@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat</title>
+  <link rel="stylesheet" href="/App.css">
+  <link rel="stylesheet" href="/chat/Chat.css">
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="index.html">首页</a>
+      <a href="chat.html">聊天</a>
+      <a href="order.html">订单</a>
+      <a href="runner.html">跑腿</a>
+      <a href="forum.html">论坛</a>
+    </nav>
+    <h2>聊天</h2>
+    <div id="status" style="min-height:1em;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <label>用户名： <input id="username" placeholder="用户名"></label>
+      <button id="setUser">设置</button>
+      <button id="callBtn" disabled>📞 呼叫</button>
+    </div>
+    <div id="friendList"></div>
+    <div>
+      <input id="newFriend" placeholder="添加好友">
+      <button id="addFriendBtn">添加</button>
+    </div>
+    <div id="chatList"></div>
+    <div id="messages"></div>
+    <form id="msgForm" style="display:none;" enctype="multipart/form-data">
+      <select id="emojiPicker"><option value="">😀</option><option value="😂">😂</option><option value="👍">👍</option><option value="🎉">🎉</option></select>
+      <input name="text" placeholder="消息" required>
+      <input type="file" id="attachment" />
+      <button type="submit">发送</button>
+    </form>
+  </div>
+  <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+  <script>
+    function showStatus(msg, isError=false) {
+      const s = document.getElementById('status');
+      s.textContent = msg;
+      s.style.color = isError ? 'red' : 'green';
+      setTimeout(()=>{ s.textContent = ''; }, 3000);
+    }
+
+    let currentChat = 'general';
+    let currentUser = '';
+    let socket;
+    async function connectSocket(token) {
+      socket = io({ auth: { token } });
+      socket.on('connect_error', err=> showStatus('Socket error: '+err.message,true));
+      socket.on('message', m=>{
+        if(m.chatId===currentChat) appendMessage(m);
+      });
+    }
+    function appendMessage(m){
+      const div = document.getElementById('messages');
+      const time = new Date(m.timestamp).toLocaleTimeString();
+      const attachments = (m.attachments||[]).map(a=>`<a href="${a.url}" target="_blank">${a.name}</a>`).join(' ');
+      const readlist = (m.readBy||[]).join(',');
+      const html = `<p><strong>${m.sender}</strong> <span class="time">${time}</span>: ${m.text} ${attachments} <button class="delete" data-id="${m.id}">×</button><br><small>read by: ${readlist}</small></p>`;
+      div.innerHTML += html;
+      div.scrollTop = div.scrollHeight;
+    }
+    async function load() {
+      const res = await fetch('/api/chat/messages?chatId='+encodeURIComponent(currentChat), {headers:{'Authorization':'Bearer '+localStorage.getItem('jwt')}});
+      const msgs = await res.json();
+      const div = document.getElementById('messages');
+      if (msgs.length === 0) {
+        div.innerHTML = '<p><em>暂无消息。</em></p>';
+      } else {
+        div.innerHTML = '';
+        msgs.forEach(m=>appendMessage(m));
+      }
+      div.scrollTop = div.scrollHeight;
+    }
+    document.getElementById('msgForm').addEventListener('submit', async e=>{
+      showStatus('发送中...');
+      e.preventDefault();
+      const form = e.target;
+      const text = form.text.value;
+      const attachments = [];
+      const fileInput = document.getElementById('attachment');
+      if(fileInput.files.length>0){
+        // placeholder: in real app you'd upload file first and include url
+        const file = fileInput.files[0];
+        attachments.push({type:file.type, name:file.name, url:'/'+file.name});
+      }
+      const data = { chatId: currentChat, sender: currentUser, text, attachments };
+      if(socket) socket.emit('message', data);
+      await fetch('/api/chat/messages', {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('jwt')}, body:JSON.stringify(data)});
+      form.reset();
+      load();
+    });
+    document.getElementById('setUser').addEventListener('click', async ()=>{
+      const u = document.getElementById('username').value.trim();
+      if(u){
+        currentUser=u;
+        localStorage.setItem('chatUser',u);
+        // get token
+        const resp = await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u})});
+        const {token} = await resp.json();
+        localStorage.setItem('jwt', token);
+        await connectSocket(token);
+        loadUserData();
+        document.getElementById('callBtn').disabled = false;
+      }
+    });
+    // restore user
+    document.getElementById('username').value = localStorage.getItem('chatUser') || '';
+    currentUser = document.getElementById('username').value;
+    if(currentUser) loadUserData();
+
+    async function loadUserData(){
+      // friends
+      const fr = await fetch('/api/friends/'+currentUser, {headers:{'Authorization':'Bearer '+localStorage.getItem('jwt')}}).then(r=>r.json());
+      const online = await fetch('/api/users/online',{headers:{'Authorization':'Bearer '+localStorage.getItem('jwt')}}).then(r=>r.json()).catch(()=>[]);
+      const fl = document.getElementById('friendList');
+      fl.innerHTML = '<strong>好友：</strong> '+fr.join(', ') + '<br><strong>在线：</strong> '+online.join(', ');
+      // chats
+      const ch = await fetch('/api/chat/chats', {headers:{'Authorization':'Bearer '+localStorage.getItem('jwt')}}).then(r=>r.json());
+      const cl = document.getElementById('chatList');
+      cl.innerHTML = ch.map(c=>`<button class=\"chatBtn\" data-id=\"${c.id}\">${c.name}</button>`).join('');
+      document.querySelectorAll('.chatBtn').forEach(b=>{
+        b.classList.toggle('active', b.dataset.id===currentChat);
+        b.addEventListener('click', ()=>{
+          currentChat=b.dataset.id;
+          load();
+          document.querySelectorAll('.chatBtn').forEach(x=>x.classList.toggle('active', x===b));
+        });
+      });
+      document.getElementById('msgForm').style.display='block';
+    }
+    // emoji insertion
+    document.getElementById('emojiPicker').addEventListener('change', e=>{
+      const txt = document.querySelector('#msgForm input[name="text"]');
+      txt.value += e.target.value;
+      e.target.value = '';
+      txt.focus();
+    });
+
+    // add friend
+    document.getElementById('addFriendBtn').addEventListener('click', async ()=>{
+      const f = document.getElementById('newFriend').value.trim();
+      if(f){
+        await fetch(`/api/friends/${currentUser}`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({friend:f})});
+        loadUserData();
+      }
+    });
+
+    // handle delete clicks
+    document.getElementById('messages').addEventListener('click', async e=>{
+      if (e.target.classList.contains('delete')) {
+        const id = e.target.dataset.id;
+        await fetch('/api/chat/messages/'+id, { method: 'DELETE' });
+        showStatus('消息已删除');
+        load();
+      }
+    });
+    // refresh every 5 seconds
+    setInterval(load, 5000);
+    // initial load maybe after user set
+
+    // call button placeholder
+    document.getElementById('callBtn').addEventListener('click', ()=>{
+      if(!currentUser) return;
+      alert('在聊天 '+currentChat+' 中发起通话（尚未实现）');
+      // real implementation: open WebRTC connection and signal via socket
+      if(socket) socket.emit('startCall', {chatId: currentChat});
+    });
+
+    // highlight nav
+    document.querySelectorAll('nav a').forEach(a=>{
+      if (a.getAttribute('href') === 'chat.html') a.style.fontWeight = 'bold';
+    });
+
+    // allow Enter key to send when focused on message field
+    const textInput = document.querySelector('#msgForm input[name="text"]');
+    textInput.addEventListener('keyup', e=>{
+      if (e.key === 'Enter') {
+        document.getElementById('msgForm').dispatchEvent(new Event('submit'));
+      }
+    });
+  </script>
+</body>
+</html>

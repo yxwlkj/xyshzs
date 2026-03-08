@@ -1,0 +1,3 @@
+# CI configuration placeholder
+application: CampusApp
+ci: true

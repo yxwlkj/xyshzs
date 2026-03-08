@@ -1,0 +1,58 @@
+/* chat/Chat.css – chat page styling */
+@import url('App.css');
+
+header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+#messages {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: #fafafa;
+}
+#msgForm {
+    display: flex;
+    gap: 10px;
+}
+#msgForm input {
+    flex: 1;
+}
+#friendList, #chatList {
+    margin: 10px 0;
+}
+#chatList button.chatBtn {
+    margin-right: 5px;
+}
+#chatList button.chatBtn.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+#messages p {
+    position: relative;
+    padding-right: 20px;
+}
+#messages .time {
+    font-size: 0.8em;
+    color: #888;
+    margin-left: 5px;
+}
+#messages .delete {
+    position: absolute;
+    right: 0;
+    top: 0;
+    border: none;
+    background: transparent;
+    color: #c00;
+    font-size: 1.0em;
+    cursor: pointer;
+}
+#messages .delete:hover {
+    color: #900;
+}
+
+/* reuse container style */
+.container {
+    padding: 20px;
+}

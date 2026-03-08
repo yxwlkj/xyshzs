@@ -1,0 +1,8 @@
+{
+  "name": "app",
+  "files": [
+    "loader.json",
+    "init.json",
+    "final.json"
+  ]
+}

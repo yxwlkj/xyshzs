@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orders</title>
+  <link rel="stylesheet" href="/App.css">
+  <link rel="stylesheet" href="/order/Order.css">
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="index.html">首页</a>
+      <a href="chat.html">聊天</a>
+      <a href="order.html">订单</a>
+      <a href="runner.html">跑腿</a>
+      <a href="forum.html">论坛</a>
+    </nav>
+    <h2>跑腿订单</h2>
+    <div id="status" style="min-height:1em;"></div>
+    <div id="orders"></div>
+    <form id="orderForm">
+      <input name="item" placeholder="商品" required>
+      <input name="quantity" type="number" placeholder="数量" required>
+      <select name="type" required>
+        <option value="general">普通</option>
+        <option value="pickup">取件</option>
+        <option value="delivery">送货</option>
+        <option value="shopping">代购</option>
+      </select>
+      <input name="pickup" placeholder="取件地址/地点">
+      <input name="destination" placeholder="目的地地址/地点">
+      <input name="campus" placeholder="校园" value="Main" required>
+      <button type="submit">提交</button>
+    </form>
+  </div>
+  <script>
+    function showStatus(msg,isError=false){const s=document.getElementById('status');s.textContent=msg;s.style.color=isError?'red':'green';setTimeout(()=>{s.textContent='';},3000);}    
+    async function load() {
+      const statusNames = {pending:'待处理',assigned:'已指派',completed:'已完成'};
+      const res = await fetch('/api/orders');
+      const orders = await res.json();
+      const div = document.getElementById('orders');
+      if (orders.length === 0) {
+        div.innerHTML = '<p><em>暂无订单。</em></p>';
+      } else {
+        div.innerHTML = orders.map(o=>{
+          const runnerInfo = o.runner ? ` <span class="runner">(跑腿员: ${o.runner})</span>` : '';
+          const statusText = statusNames[o.status] || o.status;
+          return `<div class=\"order-item${o.status==='completed'? ' completed':''}\" data-id=\"${o.orderId}\">`+
+                 `#${o.orderId}: ${o.item} x${o.quantity} [${o.type}]`+
+                 ` 取件:${o.pickup||'-'} 目的地:${o.destination||'-'} 校区:${o.campus||'-'}`+
+                 ` 状态:${statusText}${runnerInfo}`+
+                 ` <button class=\"toggle\" data-id=\"${o.orderId}\">${o.status==='completed' ? '↺' : '✔'}</button>`+
+                 `</div>`;
+        }).join('');
+      }
+      // add toggle handler
+      document.querySelectorAll('.toggle').forEach(btn=>{
+        btn.addEventListener('click', async e=>{
+          const id = btn.dataset.id;
+          const itemDiv = btn.closest('.order-item');
+          const current = itemDiv.textContent.includes('(completed)');
+          const newStatus = current ? 'pending' : 'completed';
+          await fetch('/api/orders/'+id, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:newStatus})});
+          showStatus('订单已更新');
+          load();
+        });
+      });
+    }
+    document.getElementById('orderForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const form = e.target;
+      localStorage.setItem('lastOrderItem', form.item.value);
+      const data = {
+        item: form.item.value,
+        quantity: Number(form.quantity.value),
+        type: form.type.value,
+        pickup: form.pickup.value,
+        destination: form.destination.value,
+        campus: form.campus.value
+      };
+      await fetch('/api/orders', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+      form.reset();
+      load();
+      showStatus('订单已提交');
+    });
+    // restore last item
+    document.getElementById('orderForm').item.value = localStorage.getItem('lastOrderItem') || '';    load();
+    // nav highlight
+    document.querySelectorAll('nav a').forEach(a=>{
+      if (a.getAttribute('href') === 'order.html') a.style.fontWeight = 'bold';
+    });
+  </script>
+</body>
+</html>

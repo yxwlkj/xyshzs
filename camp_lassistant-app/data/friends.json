@@ -1,0 +1,4 @@
+[
+  { "user": "alice", "friends": ["bob"] },
+  { "user": "bob", "friends": ["alice"] }
+]
