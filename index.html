@@ -5,30 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>校园跑腿</title>
   <style>
-    /* 基础样式，确保页面美观 */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-    body { background-color: #f5f5f5; }
-    .header { background-color: #333; color: white; padding: 1rem; text-align: center; }
-    .order-item { background: white; margin: 1rem; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .price { color: #ff6b35; font-size: 1.2rem; font-weight: bold; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    body {
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      background-color: #2c3e50;
+      color: white;
+      padding: 16px;
+      text-align: center;
+    }
+    .order-card {
+      background: white;
+      margin: 12px;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .order-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .order-address {
+      color: #666;
+      margin: 4px 0;
+    }
+    .order-price {
+      color: #ff6b35;
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
+  <div class="navbar">
     <h1>校园跑腿</h1>
   </div>
   <div class="order-list">
-    <div class="order-item">
-      <h3>骑手订单 1</h3>
-      <p>取货地址：XX 宿舍 3 栋</p>
-      <p>收货地址：XX 教学楼 2 楼</p>
-      <p class="price">价格：¥ 12.00</p>
+    <div class="order-card">
+      <div class="order-title">骑手订单 - 快递代取</div>
+      <div class="order-address">取货地址：学生宿舍 3 栋</div>
+      <div class="order-address">收货地址：图书馆 2 楼</div>
+      <div class="order-price">¥ 10.00</div>
     </div>
-    <div class="order-item">
-      <h3>骑手订单 2</h3>
-      <p>取货地址：XX 食堂 1 楼</p>
-      <p>收货地址：XX 图书馆 3 楼</p>
-      <p class="price">价格：¥ 8.00</p>
+    <div class="order-card">
+      <div class="order-title">骑手订单 - 外卖配送</div>
+      <div class="order-address">取货地址：一食堂 2 楼</div>
+      <div class="order-address">收货地址：教学楼 5 楼</div>
+      <div class="order-price">¥ 8.00</div>
     </div>
   </div>
 </body>
