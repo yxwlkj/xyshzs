@@ -13,54 +13,202 @@
     }
     body {
       background-color: #f8f9fa;
+      padding-bottom: 60px;
     }
-    .navbar {
-      background-color: #2c3e50;
-      color: white;
-      padding: 16px;
+    /* 底部 Tab 导航 */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      border-top: 1px solid #e5e5e5;
+    }
+    .tab-item {
       text-align: center;
-    }
-    .order-card {
-      background: white;
-      margin: 12px;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .order-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-    .order-address {
+      font-size: 12px;
       color: #666;
-      margin: 4px 0;
+      cursor: pointer;
     }
-    .order-price {
+    .tab-item.active {
       color: #ff6b35;
+    }
+    /* 页面容器 */
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+    /* 通用样式 */
+    .page-title {
+      padding: 16px;
       font-size: 20px;
       font-weight: bold;
-      margin-top: 8px;
+      text-align: center;
+      background-color: white;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .content {
+      padding: 16px;
+    }
+    .item {
+      background: white;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    /* 首页专属 */
+    .home-header {
+      background-color: #333;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .home-banner {
+      background: linear-gradient(90deg, #ff6b35, #ff8c42);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      margin: 10px;
+      border-radius: 8px;
+    }
+    /* 文字样式 */
+    .price {
+      color: #ff6b35;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="navbar">
-    <h1>校园跑腿</h1>
-  </div>
-  <div class="order-list">
-    <div class="order-card">
-      <div class="order-title">骑手订单 - 快递代取</div>
-      <div class="order-address">取货地址：学生宿舍 3 栋</div>
-      <div class="order-address">收货地址：图书馆 2 楼</div>
-      <div class="order-price">¥ 10.00</div>
+  <!-- 首页 -->
+  <div id="page-home" class="page active">
+    <div class="home-header">
+      <h1>校园跑腿</h1>
     </div>
-    <div class="order-card">
-      <div class="order-title">骑手订单 - 外卖配送</div>
-      <div class="order-address">取货地址：一食堂 2 楼</div>
-      <div class="order-address">收货地址：教学楼 5 楼</div>
-      <div class="order-price">¥ 8.00</div>
+    <div class="home-banner">
+      <h2>便捷校园生活，从跑腿开始</h2>
+      <p>代取快递、外卖配送、校园服务一站式解决</p>
+    </div>
+    <div class="content">
+      <div class="item">
+        <h3>热门服务：快递代取</h3>
+        <p>足不出户，快递送到宿舍</p>
+      </div>
+      <div class="item">
+        <h3>热门服务：外卖配送</h3>
+        <p>食堂美食，快速送达教学楼</p>
+      </div>
     </div>
   </div>
+
+  <!-- 聊天 -->
+  <div id="page-chat" class="page">
+    <div class="page-title">聊天</div>
+    <div class="content">
+      <div class="item">
+        <h4>客服小助手</h4>
+        <p>您好，请问需要什么帮助？</p>
+      </div>
+      <div class="item">
+        <h4>骑手小李</h4>
+        <p>您的订单已取货，预计15分钟送达</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 跑腿服务 -->
+  <div id="page-service" class="page">
+    <div class="page-title">跑腿服务</div>
+    <div class="content">
+      <div class="item">
+        <h3>快递代取</h3>
+        <p>取货：宿舍 3 栋 | 送达：图书馆 | <span class="price">¥10.00</span></p>
+      </div>
+      <div class="item">
+        <h3>外卖配送</h3>
+        <p>取货：一食堂 | 送达：教学楼 5 楼 | <span class="price">¥8.00</span></p>
+      </div>
+      <div class="item">
+        <h3>代买物品</h3>
+        <p>取货：超市 | 送达：任意地点 | <span class="price">¥12.00</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 论坛 -->
+  <div id="page-forum" class="page">
+    <div class="page-title">校园论坛</div>
+    <div class="content">
+      <div class="item">
+        <h4>求助：校园网断了怎么办？</h4>
+        <p>回复：32 | 浏览：189</p>
+      </div>
+      <div class="item">
+        <h4>分享：期末复习资料汇总</h4>
+        <p>回复：56 | 浏览：320</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 我的 -->
+  <div id="page-user" class="page">
+    <div class="page-title">我的</div>
+    <div class="content">
+      <div class="item">
+        <p>用户名：孙山果</p>
+        <p>手机号：138****1234</p>
+      </div>
+      <div class="item">
+        <p>我的订单：3 个</p>
+        <p>我的余额：<span class="price">¥25.00</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部 Tab 导航 -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="switchPage('home')">
+      <div>🏠</div>
+      <div>首页</div>
+    </div>
+    <div class="tab-item" onclick="switchPage('chat')">
+      <div>💬</div>
+      <div>聊天</div>
+    </div>
+    <div class="tab-item" onclick="switchPage('service')">
+      <div>🚴</div>
+      <div>跑腿服务</div>
+    </div>
+    <div class="tab-item" onclick="switchPage('forum')">
+      <div>📢</div>
+      <div>论坛</div>
+    </div>
+    <div class="tab-item" onclick="switchPage('user')">
+      <div>👤</div>
+      <div>我的</div>
+    </div>
+  </div>
+
+  <script>
+    // Tab 切换逻辑
+    function switchPage(pageName) {
+      // 隐藏所有页面
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      // 显示目标页面
+      document.getElementById('page-' + pageName).classList.add('active');
+      // 更新 Tab 激活状态
+      document.querySelectorAll('.tab-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-item')[['home', 'chat', 'service', 'forum', 'user'].indexOf(pageName)].classList.add('active');
+    }
+  </script>
 </body>
 </html>
