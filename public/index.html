@@ -1,171 +1,505 @@
+cd /workspaces/xyshzs
+cat > public/index.html << EOF
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>校园跑腿</title>
+  <title>校园跑腿 - 全功能版</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    body {
-      background-color: #f8f9fa;
-      padding-bottom: 60px;
-    }
+    /* 全局样式 */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body { background-color: #f8f9fa; padding-bottom: 60px; }
     /* 底部 Tab 导航 */
-    .tab-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: white;
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 0;
-      border-top: 1px solid #e5e5e5;
-    }
-    .tab-item {
-      text-align: center;
-      font-size: 12px;
-      color: #666;
-      cursor: pointer;
-    }
-    .tab-item.active {
-      color: #ff6b35;
-    }
-    /* 页面容器 */
-    .page {
-      display: none;
-    }
-    .page.active {
-      display: block;
-    }
+    .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #e5e5e5; }
+    .tab-item { text-align: center; font-size: 12px; color: #666; cursor: pointer; }
+    .tab-item.active { color: #ff6b35; }
+    /* 页面容器（主页面） */
+    .page { display: none; }
+    .page.active { display: block; }
+    /* 子页面容器 */
+    .sub-page { display: none; }
+    .sub-page.active { display: block; }
     /* 通用样式 */
-    .page-title {
-      padding: 16px;
-      font-size: 20px;
-      font-weight: bold;
-      text-align: center;
-      background-color: white;
-      border-bottom: 1px solid #e5e5e5;
-    }
-    .content {
-      padding: 16px;
-    }
-    .item {
-      background: white;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    /* 首页专属 */
-    .home-header {
-      background-color: #333;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    .home-banner {
-      background: linear-gradient(90deg, #ff6b35, #ff8c42);
-      color: white;
-      padding: 20px;
-      text-align: center;
-      margin: 10px;
-      border-radius: 8px;
-    }
-    /* 文字样式 */
-    .price {
-      color: #ff6b35;
-      font-weight: bold;
+    .page-title { padding: 16px; font-size: 20px; font-weight: bold; text-align: center; background: white; border-bottom: 1px solid #e5e5e5; }
+    .sub-title { padding: 12px; font-size: 18px; font-weight: bold; background: white; border-bottom: 1px solid #e5e5e5; }
+    .content { padding: 16px; }
+    .item { background: white; margin: 10px 0; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .btn { padding: 8px 16px; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+    .btn-secondary { background: #666; }
+    .btn-outline { background: white; color: #ff6b35; border: 1px solid #ff6b35; }
+    .form-item { margin: 15px 0; }
+    .form-item label { display: block; margin-bottom: 5px; }
+    .form-item input, .form-item select, .form-item textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    .price { color: #ff6b35; font-weight: bold; }
+    /* 聊天样式（仿微信） */
+    .chat-list { padding: 10px; }
+    .chat-item { display: flex; padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px; }
+    .chat-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+    .chat-info { flex: 1; }
+    .chat-name { font-weight: bold; margin-bottom: 3px; }
+    .chat-content { color: #666; font-size: 14px; }
+    .chat-time { font-size: 12px; color: #999; }
+    /* 聊天窗口样式 */
+    .chat-window { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999; }
+    .chat-window.active { display: block; }
+    .chat-header { padding: 12px; background: #f5f5f5; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; }
+    .chat-back { margin-right: 10px; cursor: pointer; }
+    .chat-messages { height: calc(100% - 120px); padding: 10px; overflow-y: auto; }
+    .msg-item { margin: 10px 0; }
+    .msg-mine { text-align: right; }
+    .msg-bubble { display: inline-block; padding: 8px 12px; border-radius: 8px; max-width: 70%; }
+    .msg-mine .msg-bubble { background: #ff6b35; color: white; }
+    .msg-other .msg-bubble { background: #e5e5e5; color: #333; }
+    .chat-input { position: absolute; bottom: 0; left: 0; width: 100%; padding: 10px; background: white; border-top: 1px solid #e5e5e5; display: flex; }
+    .chat-input input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 20px; margin-right: 10px; }
+    .chat-tools { display: flex; gap: 10px; align-items: center; }
+    /* 适配小程序/APP/浏览器 */
+    @media (max-width: 768px) {
+      .content { padding: 10px; }
+      .item { margin: 5px 0; padding: 10px; }
     }
   </style>
 </head>
 <body>
-  <!-- 首页 -->
+  <!-- 1. 首页（登录/注册） -->
   <div id="page-home" class="page active">
-    <div class="home-header">
-      <h1>校园跑腿</h1>
-    </div>
-    <div class="home-banner">
-      <h2>便捷校园生活，从跑腿开始</h2>
-      <p>代取快递、外卖配送、校园服务一站式解决</p>
-    </div>
-    <div class="content">
-      <div class="item">
-        <h3>热门服务：快递代取</h3>
-        <p>足不出户，快递送到宿舍</p>
+    <div class="page-title">校园跑腿</div>
+    <!-- 首页子页面：登录 -->
+    <div id="home-login" class="sub-page active">
+      <div class="content">
+        <div class="form-item">
+          <label>手机号</label>
+          <input type="tel" placeholder="请输入手机号" id="login-phone">
+        </div>
+        <div class="form-item">
+          <label>密码</label>
+          <input type="password" placeholder="请输入密码" id="login-pwd">
+        </div>
+        <button class="btn" onclick="alert('登录成功！')">密码登录</button>
+        <button class="btn btn-outline" onclick="switchSubPage('home', 'register')">注册账号</button>
+        <button class="btn btn-secondary" onclick="alert('已跳转到个人信息管理页面')">个人信息管理</button>
       </div>
-      <div class="item">
-        <h3>热门服务：外卖配送</h3>
-        <p>食堂美食，快速送达教学楼</p>
+    </div>
+    <!-- 首页子页面：注册 -->
+    <div id="home-register" class="sub-page">
+      <div class="content">
+        <div class="form-item">
+          <label>用户名</label>
+          <input type="text" placeholder="请输入用户名" id="reg-name">
+        </div>
+        <div class="form-item">
+          <label>手机号</label>
+          <input type="tel" placeholder="请输入手机号" id="reg-phone">
+        </div>
+        <div class="form-item">
+          <label>密码</label>
+          <input type="password" placeholder="请输入密码" id="reg-pwd">
+        </div>
+        <button class="btn" onclick="alert('注册成功！')">完成注册</button>
+        <button class="btn btn-outline" onclick="switchSubPage('home', 'login')">返回登录</button>
       </div>
     </div>
   </div>
 
-  <!-- 聊天 -->
+  <!-- 2. 聊天（仿微信全功能） -->
   <div id="page-chat" class="page">
     <div class="page-title">聊天</div>
-    <div class="content">
-      <div class="item">
-        <h4>客服小助手</h4>
-        <p>您好，请问需要什么帮助？</p>
+    <!-- 聊天子页面：聊天列表 -->
+    <div id="chat-list" class="sub-page active">
+      <div class="content">
+        <button class="btn" onclick="switchSubPage('chat', 'add-friend')">搜索添加好友</button>
+        <button class="btn" onclick="switchSubPage('chat', 'friend-request')">好友申请列表</button>
+        <button class="btn" onclick="switchSubPage('chat', 'settings')">聊天设置</button>
+        
+        <div class="chat-list">
+          <!-- 私聊好友 -->
+          <div class="chat-item" onclick="openChatWindow('小李')">
+            <img src="https://picsum.photos/40/40?random=1" class="chat-avatar">
+            <div class="chat-info">
+              <div class="chat-name">小李（骑手）</div>
+              <div class="chat-content">您的订单已送达！</div>
+            </div>
+            <div class="chat-time">10:20</div>
+          </div>
+          <!-- 群聊 -->
+          <div class="chat-item" onclick="openChatWindow('校园跑腿交流群')">
+            <img src="https://picsum.photos/40/40?random=2" class="chat-avatar">
+            <div class="chat-info">
+              <div class="chat-name">校园跑腿交流群</div>
+              <div class="chat-content">小王：求代取快递！</div>
+            </div>
+            <div class="chat-time">09:45</div>
+          </div>
+          <!-- 好友申请提醒 -->
+          <div class="chat-item" onclick="switchSubPage('chat', 'friend-request')">
+            <img src="https://picsum.photos/40/40?random=3" class="chat-avatar">
+            <div class="chat-info">
+              <div class="chat-name">好友申请</div>
+              <div class="chat-content">3条新申请</div>
+            </div>
+            <div class="chat-time">08:30</div>
+          </div>
+        </div>
       </div>
-      <div class="item">
-        <h4>骑手小李</h4>
-        <p>您的订单已取货，预计15分钟送达</p>
+    </div>
+
+    <!-- 聊天子页面：添加好友 -->
+    <div id="chat-add-friend" class="sub-page">
+      <div class="sub-title">添加好友</div>
+      <div class="content">
+        <div class="form-item">
+          <label>搜索用户名/手机号</label>
+          <input type="text" placeholder="请输入搜索内容" id="search-friend">
+        </div>
+        <button class="btn" onclick="alert('找到用户：小张，可发送好友申请')">搜索</button>
+        <button class="btn btn-outline" onclick="switchSubPage('chat', 'list')">返回</button>
+      </div>
+    </div>
+
+    <!-- 聊天子页面：好友申请列表 -->
+    <div id="chat-friend-request" class="sub-page">
+      <div class="sub-title">好友申请</div>
+      <div class="content">
+        <div class="item">
+          <p>申请人：小张</p>
+          <p>备注：我是同班同学</p>
+          <button class="btn" onclick="alert('已同意好友申请')">同意</button>
+          <button class="btn btn-secondary" onclick="alert('已拒绝好友申请')">拒绝</button>
+        </div>
+        <div class="item">
+          <p>申请人：小王</p>
+          <p>备注：求代取快递</p>
+          <button class="btn" onclick="alert('已同意好友申请')">同意</button>
+          <button class="btn btn-secondary" onclick="alert('已拒绝好友申请')">拒绝</button>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('chat', 'list')">返回</button>
+      </div>
+    </div>
+
+    <!-- 聊天子页面：聊天设置 -->
+    <div id="chat-settings" class="sub-page">
+      <div class="sub-title">聊天设置</div>
+      <div class="content">
+        <div class="item">
+          <p>新消息提醒</p>
+          <input type="checkbox" checked> 弹框提醒
+          <input type="checkbox" checked> 声音提醒
+        </div>
+        <div class="item">
+          <p>新消息提示音</p>
+          <select>
+            <option>提示音1</option>
+            <option>提示音2</option>
+            <option>提示音3</option>
+            <option>提示音4</option>
+            <option>提示音5</option>
+            <option>提示音6</option>
+          </select>
+        </div>
+        <div class="item">
+          <p>在线状态</p>
+          <button class="btn" onclick="alert('已设置为在线')">在线</button>
+          <button class="btn" onclick="alert('已设置为隐身')">隐身</button>
+        </div>
+        <button class="btn btn-secondary" onclick="switchSubPage('chat', 'list')">返回</button>
+      </div>
+    </div>
+
+    <!-- 聊天窗口（仿微信） -->
+    <div id="chat-window" class="chat-window">
+      <div class="chat-header">
+        <div class="chat-back" onclick="closeChatWindow()">←</div>
+        <div id="chat-window-title">小李（骑手）</div>
+        <div style="flex:1;text-align:right">
+          <button class="btn btn-outline" onclick="alert('已发起语音通话')">📞</button>
+          <button class="btn btn-outline" onclick="alert('已发起视频通话')">📹</button>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg-item msg-other">
+          <div class="msg-bubble">您好，您的订单已取货！</div>
+        </div>
+        <div class="msg-item msg-mine">
+          <div class="msg-bubble">好的，麻烦快点哦～</div>
+        </div>
+        <div class="msg-item msg-other">
+          <div class="msg-bubble"><img src="https://picsum.photos/100/100?random=1" style="width:100px;border-radius:4px"></div>
+        </div>
+        <div class="msg-item msg-mine">
+          <div class="msg-bubble">😜 收到，谢谢！</div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" placeholder="输入消息..." id="chat-input">
+        <div class="chat-tools">
+          <button onclick="alert('已选择图片')">🖼️</button>
+          <button onclick="alert('已选择文件')">📁</button>
+          <button onclick="alert('已发送语音')">🎙️</button>
+          <button onclick="alert('已打开表情包')">😊</button>
+          <button class="btn" onclick="sendChatMsg()">发送</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 跑腿服务 -->
+  <!-- 3. 跑腿服务（用户/骑手/管理员） -->
   <div id="page-service" class="page">
     <div class="page-title">跑腿服务</div>
-    <div class="content">
-      <div class="item">
-        <h3>快递代取</h3>
-        <p>取货：宿舍 3 栋 | 送达：图书馆 | <span class="price">¥10.00</span></p>
+    <!-- 跑腿服务子页面：用户端 -->
+    <div id="service-user" class="sub-page active">
+      <div class="content">
+        <button class="btn" onclick="switchSubPage('service', 'publish')">发布订单</button>
+        <button class="btn" onclick="switchSubPage('service', 'order-manage')">订单管理</button>
+        <button class="btn" onclick="switchSubPage('service', 'address')">地址管理</button>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">切换到骑手端</button>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">切换到管理员端</button>
+
+        <div class="item">
+          <h3>热门服务</h3>
+          <p>📦 快递代取 | 🍱 外卖配送 | 💌 表白墙 | 🛒 二手交易</p>
+        </div>
       </div>
-      <div class="item">
-        <h3>外卖配送</h3>
-        <p>取货：一食堂 | 送达：教学楼 5 楼 | <span class="price">¥8.00</span></p>
+    </div>
+
+    <!-- 跑腿服务子页面：发布订单 -->
+    <div id="service-publish" class="sub-page">
+      <div class="sub-title">发布订单</div>
+      <div class="content">
+        <div class="form-item">
+          <label>服务类型</label>
+          <select>
+            <option>快递代取</option>
+            <option>外卖配送</option>
+            <option>表白墙</option>
+            <option>二手交易</option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label>取货地址</label>
+          <input type="text" placeholder="请输入取货地址">
+        </div>
+        <div class="form-item">
+          <label>送达地址</label>
+          <input type="text" placeholder="请输入送达地址">
+        </div>
+        <div class="form-item">
+          <label>服务费用（元）</label>
+          <input type="number" placeholder="请输入费用" min="0">
+        </div>
+        <button class="btn" onclick="alert('订单发布成功！')">发布订单</button>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
       </div>
-      <div class="item">
-        <h3>代买物品</h3>
-        <p>取货：超市 | 送达：任意地点 | <span class="price">¥12.00</span></p>
+    </div>
+
+    <!-- 跑腿服务子页面：订单管理 -->
+    <div id="service-order-manage" class="sub-page">
+      <div class="sub-title">订单管理</div>
+      <div class="content">
+        <div class="item">
+          <h3>待接单</h3>
+          <p>订单号：123456 | 服务类型：快递代取 | <span class="price">¥10.00</span></p>
+          <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
+        </div>
+        <div class="item">
+          <h3>已完成</h3>
+          <p>订单号：654321 | 服务类型：外卖配送 | <span class="price">¥8.00</span></p>
+          <button class="btn" onclick="alert('已跳转到评价页面')">评价骑手</button>
+          <button class="btn btn-outline" onclick="alert('已查看订单详情')">详情</button>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
+      </div>
+    </div>
+
+    <!-- 跑腿服务子页面：地址管理 -->
+    <div id="service-address" class="sub-page">
+      <div class="sub-title">地址管理</div>
+      <div class="content">
+        <div class="item">
+          <h3>常用收货地址</h3>
+          <p>学生宿舍 3 栋 502</p>
+          <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
+          <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
+        </div>
+        <div class="item">
+          <h3>常用发货地址</h3>
+          <p>图书馆 2 楼自习室</p>
+          <button class="btn btn-outline" onclick="alert('已编辑地址')">编辑</button>
+          <button class="btn btn-secondary" onclick="alert('已删除地址')">删除</button>
+        </div>
+        <button class="btn" onclick="alert('已跳转到添加地址页面')">添加新地址</button>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回</button>
+      </div>
+    </div>
+
+    <!-- 跑腿服务子页面：骑手端 -->
+    <div id="service-rider" class="sub-page">
+      <div class="sub-title">骑手端</div>
+      <div class="content">
+        <button class="btn" onclick="alert('已跳转到实名认证页面')">骑手认证</button>
+        <button class="btn" onclick="switchSubPage('service', 'rider-order')">接单管理</button>
+        <button class="btn" onclick="switchSubPage('service', 'rider-income')">收入管理</button>
+        <button class="btn" onclick="switchSubPage('service', 'rider-rank')">接单排行榜</button>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
+      </div>
+    </div>
+
+    <!-- 骑手端子页面：接单管理 -->
+    <div id="service-rider-order" class="sub-page">
+      <div class="sub-title">接单管理</div>
+      <div class="content">
+        <div class="item">
+          <h3>可接订单</h3>
+          <p>订单号：123456 | 取货：宿舍 3 栋 | 送达：图书馆 | <span class="price">¥10.00</span></p>
+          <button class="btn" onclick="alert('已接单！')">接单</button>
+        </div>
+        <div class="item">
+          <h3>待配送</h3>
+          <p>订单号：654321 | 取货：食堂 | 送达：教学楼 | <span class="price">¥8.00</span></p>
+          <button class="btn" onclick="alert('已更新订单状态为：配送中')">更新状态</button>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
+      </div>
+    </div>
+
+    <!-- 骑手端子页面：收入管理 -->
+    <div id="service-rider-income" class="sub-page">
+      <div class="sub-title">收入管理</div>
+      <div class="content">
+        <div class="item">
+          <h3>本月收入</h3>
+          <p><span class="price">¥1280.00</span></p>
+          <button class="btn" onclick="alert('已查看收入明细')">明细</button>
+          <button class="btn" onclick="alert('已申请提现，预计1-3个工作日到账')">申请提现</button>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
+      </div>
+    </div>
+
+    <!-- 骑手端子页面：接单排行榜 -->
+    <div id="service-rider-rank" class="sub-page">
+      <div class="sub-title">接单排行榜</div>
+      <div class="content">
+        <div class="item">
+          <p>🥇 小李：本月接单 120 单</p>
+          <p>🥈 小张：本月接单 105 单</p>
+          <p>🥉 小王：本月接单 98 单</p>
+          <p>🏅 您的排名：第 5 名（88 单）</p>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'rider')">返回</button>
+      </div>
+    </div>
+
+    <!-- 跑腿服务子页面：管理员端 -->
+    <div id="service-admin" class="sub-page">
+      <div class="sub-title">管理员端</div>
+      <div class="content">
+        <button class="btn" onclick="switchSubPage('service', 'admin-data')">数据统计</button>
+        <button class="btn" onclick="switchSubPage('service', 'admin-user')">用户管理</button>
+        <button class="btn" onclick="switchSubPage('service', 'admin-rider-audit')">骑手认证审核</button>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'user')">返回用户端</button>
+      </div>
+    </div>
+
+    <!-- 管理员端子页面：数据统计 -->
+    <div id="service-admin-data" class="sub-page">
+      <div class="sub-title">数据统计</div>
+      <div class="content">
+        <div class="item">
+          <p>总用户数：1258 人</p>
+          <p>总订单数：3680 单</p>
+          <p>总交易金额：<span class="price">¥45680.00</span></p>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+      </div>
+    </div>
+
+    <!-- 管理员端子页面：用户管理 -->
+    <div id="service-admin-user" class="sub-page">
+      <div class="sub-title">用户管理</div>
+      <div class="content">
+        <div class="item">
+          <p>用户名：孙山果 | 手机号：138****1234 | 状态：正常</p>
+          <button class="btn btn-secondary" onclick="alert('已禁用该用户')">禁用</button>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
+      </div>
+    </div>
+
+    <!-- 管理员端子页面：骑手认证审核 -->
+    <div id="service-admin-rider-audit" class="sub-page">
+      <div class="sub-title">骑手认证审核</div>
+      <div class="content">
+        <div class="item">
+          <p>申请人：小李 | 身份证：110****1999</p>
+          <button class="btn" onclick="alert('已通过认证审核')">通过</button>
+          <button class="btn btn-secondary" onclick="alert('已拒绝认证审核')">拒绝</button>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('service', 'admin')">返回</button>
       </div>
     </div>
   </div>
 
-  <!-- 论坛 -->
+  <!-- 4. 论坛（待开发） -->
   <div id="page-forum" class="page">
     <div class="page-title">校园论坛</div>
     <div class="content">
-      <div class="item">
-        <h4>求助：校园网断了怎么办？</h4>
-        <p>回复：32 | 浏览：189</p>
-      </div>
-      <div class="item">
-        <h4>分享：期末复习资料汇总</h4>
-        <p>回复：56 | 浏览：320</p>
+      <div class="item" style="text-align:center;padding:50px">
+        <h3>论坛功能待开发...</h3>
+        <p>敬请期待！</p>
       </div>
     </div>
   </div>
 
-  <!-- 我的 -->
+  <!-- 5. 我的（个人中心） -->
   <div id="page-user" class="page">
-    <div class="page-title">我的</div>
-    <div class="content">
-      <div class="item">
-        <p>用户名：孙山果</p>
-        <p>手机号：138****1234</p>
+    <div class="page-title">个人中心</div>
+    <!-- 我的子页面：个人信息 -->
+    <div id="user-info" class="sub-page active">
+      <div class="content">
+        <div class="item">
+          <p>用户名：孙山果</p>
+          <p>手机号：138****1234</p>
+          <p>账户余额：<span class="price">¥25.00</span></p>
+        </div>
+        <button class="btn" onclick="switchSubPage('user', 'edit-info')">编辑个人信息</button>
+        <button class="btn" onclick="switchSubPage('user', 'payment')">支付系统</button>
+        <button class="btn" onclick="alert('已退出登录，返回首页')">退出登录</button>
       </div>
-      <div class="item">
-        <p>我的订单：3 个</p>
-        <p>我的余额：<span class="price">¥25.00</span></p>
+    </div>
+
+    <!-- 我的子页面：编辑个人信息 -->
+    <div id="user-edit-info" class="sub-page">
+      <div class="sub-title">编辑个人信息</div>
+      <div class="content">
+        <div class="form-item">
+          <label>用户名</label>
+          <input type="text" value="孙山果">
+        </div>
+        <div class="form-item">
+          <label>头像</label>
+          <input type="file" accept="image/*">
+        </div>
+        <button class="btn" onclick="alert('信息修改成功！')">保存</button>
+        <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
+      </div>
+    </div>
+
+    <!-- 我的子页面：支付系统 -->
+    <div id="user-payment" class="sub-page">
+      <div class="sub-title">支付系统</div>
+      <div class="content">
+        <div class="item">
+          <h3>充值余额</h3>
+          <input type="number" placeholder="请输入充值金额" min="1">
+          <button class="btn" onclick="alert('充值成功！')">立即充值</button>
+        </div>
+        <div class="item">
+          <h3>支付方式</h3>
+          <p>微信支付 ✅</p>
+          <p>支付宝支付 ✅</p>
+        </div>
+        <button class="btn btn-outline" onclick="switchSubPage('user', 'info')">返回</button>
       </div>
     </div>
   </div>
@@ -195,20 +529,63 @@
   </div>
 
   <script>
-    // Tab 切换逻辑
+    // 切换主页面（Tab 切换）
     function switchPage(pageName) {
-      // 隐藏所有页面
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
-      // 显示目标页面
+      // 隐藏所有主页面
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      // 显示目标主页面
       document.getElementById('page-' + pageName).classList.add('active');
       // 更新 Tab 激活状态
-      document.querySelectorAll('.tab-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      document.querySelectorAll('.tab-item')[['home', 'chat', 'service', 'forum', 'user'].indexOf(pageName)].classList.add('active');
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      const tabs = ['home', 'chat', 'service', 'forum', 'user'];
+      document.querySelectorAll('.tab-item')[tabs.indexOf(pageName)].classList.add('active');
+      // 关闭聊天窗口（如果打开）
+      closeChatWindow();
+    }
+
+    // 切换子页面
+    function switchSubPage(mainPage, subPage) {
+      // 隐藏该主页面下所有子页面
+      document.querySelectorAll(`#page-${mainPage} .sub-page`).forEach(s => s.classList.remove('active'));
+      // 显示目标子页面
+      document.getElementById(`${mainPage}-${subPage}`).classList.add('active');
+    }
+
+    // 打开聊天窗口
+    function openChatWindow(title) {
+      document.getElementById('chat-window-title').innerText = title;
+      document.getElementById('chat-window').classList.add('active');
+    }
+
+    // 关闭聊天窗口
+    function closeChatWindow() {
+      document.getElementById('chat-window').classList.remove('active');
+    }
+
+    // 发送聊天消息
+    function sendChatMsg() {
+      const input = document.getElementById('chat-input');
+      const msg = input.value.trim();
+      if (msg) {
+        const messages = document.getElementById('chat-messages');
+        const msgItem = document.createElement('div');
+        msgItem.className = 'msg-item msg-mine';
+        msgItem.innerHTML = `<div class="msg-bubble">${msg}</div>`;
+        messages.appendChild(msgItem);
+        input.value = '';
+        // 滚动到底部
+        messages.scrollTop = messages.scrollHeight;
+        // 模拟对方回复
+        setTimeout(() => {
+          const replyItem = document.createElement('div');
+          replyItem.className = 'msg-item msg-other';
+          replyItem.innerHTML = `<div class="msg-bubble">收到啦！</div>`;
+          messages.appendChild(replyItem);
+          messages.scrollTop = messages.scrollHeight;
+        }, 1000);
+      }
     }
   </script>
 </body>
 </html>
+EOF
