@@ -1,0 +1,8 @@
+{
+  "build": {
+    "outputDirectory": "unpackage/dist/build/h5" // 告诉 Vercel 打包产物的位置
+  },
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" } // 解决前端路由刷新 404 问题
+  ]
+}
